@@ -1,3 +1,5 @@
+import json
+import pandas as pd
 import gradio as gr
 
 from src.chat import respond
@@ -33,20 +35,24 @@ with gr.Blocks(theme=custom_theme) as demo:
                             pause = gr.Button("⏸️ Pause")
                             reset = gr.Button("🔄 Reset")
 
-            with gr.Column(scale=2):
-                display_df = gr.DataFrame(
-                    label="Production Data",
-                    headers=[
-                        "Part ID", "Timestamp", "Position", "Orientation", "Tool ID",
-                        "Compliance", "Event", "Error Code", "Error Description",
-                        "Downtime Start", "Downtime End"
-                    ]
-                )
+            with gr.Column(scale=3):
+                df_outputs = {
+                    "DataFrame 1": pd.DataFrame(),
+                    "DataFrame 2": pd.DataFrame(),
+                    "DataFrame 3": pd.DataFrame(),
+                    "DataFrame 4": pd.DataFrame(),
+                    "DataFrame 5": pd.DataFrame(),
+                }
+                json_output = {}
+
+                df_components = [gr.DataFrame(label=df_name, visible=False) for df_name in df_outputs.keys()]
+                json_component = gr.JSON(label="Machine JSON", value=json_output, visible=False)
+
                 play.click(
                         fn=play_fn,
                         inputs=None,
-                        outputs=display_df,
-                    )
+                        outputs=df_components + [json_component]
+                )
                 pause.click(
                     fn=pause_fn,
                     inputs=None,
@@ -57,6 +63,7 @@ with gr.Blocks(theme=custom_theme) as demo:
                     inputs=None,
                     outputs=None
                 )
+
 
     with gr.Tab("Description"):
         gr.Markdown(

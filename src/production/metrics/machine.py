@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import os
 
-def machine_metrics(raw_data):
+def get_machine_metrics(raw_data):
     """
     Calculate machine efficiency metrics from raw production data.
     :param raw_data: collection of raw production data containing timestamps, downtime, and compliance information.
@@ -49,7 +49,7 @@ def machine_metrics(raw_data):
     else:
         mttr = pd.Timedelta(0)
 
-    results = {
+    return {
         "opening_time": str(opening_time),
         "required_time": str(required_time),
         "unplanned_stop_time": str(unplanned_stop_time),
@@ -63,10 +63,3 @@ def machine_metrics(raw_data):
         "MTBF": str(mtbf),
         "MTTR": str(mttr)
     }
-
-    os.makedirs('data', exist_ok=True)
-
-    with open('data/efficiency.json', 'w') as json_file:
-        json.dump(results, json_file, indent=4)
-
-    return results

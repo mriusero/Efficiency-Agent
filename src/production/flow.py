@@ -1,4 +1,6 @@
+import os
 import time
+import json
 import random
 import numpy as np
 import pandas as pd
@@ -112,8 +114,8 @@ def play_fn():
     while PRODUCTION:
         data = synthetic_data()
         raw_data = compile(data)
-        yield raw_data
-        process(raw_data)
+        tools_dfs, machine_json = process(raw_data)
+        yield [tools_dfs[key] for key in tools_dfs.keys()] + [machine_json]
 
 
 def pause_fn():
@@ -129,6 +131,7 @@ def reset_fn():
     """
     Reset the production state and clear the data.
     """
+    os.system('clear')
     print("=== RESET DONE ===")
     global PRODUCTION, PROD_STATE
     PRODUCTION = False
