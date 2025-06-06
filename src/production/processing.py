@@ -1,5 +1,4 @@
 import json
-import numpy as np
 
 from .metrics.tools import get_tools_metrics
 from .metrics.machine import get_machine_metrics
