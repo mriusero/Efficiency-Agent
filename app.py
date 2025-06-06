@@ -43,7 +43,7 @@ with gr.Blocks(theme=custom_theme) as demo:
                 """
             )
             gr.HTML("<div style='margin-bottom: 40px;'></div>")
-            chatbot = gr.ChatInterface(respond)
+            chatbot = gr.ChatInterface(respond, type='messages')
 
         # DASHBOARD
         with gr.Tab("Dashboard"):

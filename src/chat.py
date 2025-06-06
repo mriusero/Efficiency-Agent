@@ -2,14 +2,12 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient("HuggingFaceH4/zephyr-7b-beta")
 
-def respond(
-    message,
-    history: list[tuple[str, str]],
-    system_message,
-    max_tokens,
-    temperature,
-    top_p,
-):
+def respond(message, history):
+    system_message = "Your default system message"
+    max_tokens = 150
+    temperature = 0.7
+    top_p = 0.9
+
     messages = [{"role": "system", "content": system_message}]
 
     for val in history:
@@ -30,6 +28,5 @@ def respond(
         top_p=top_p,
     ):
         token = message.choices[0].delta.content
-
         response += token
         yield response
