@@ -16,7 +16,7 @@ with gr.Blocks(theme=custom_theme) as demo:
 
         # CHAT_INTERFACE
         gr.Markdown("# AI Industrial Efficiency Helper ⚡️")
-        gr.Markdown("### *A production efficiency intelligence, for industries & services (WIP)*")
+        gr.Markdown("### *AI for efficiency in Industries & Services*")
         gr.Markdown(
             """
             This demo showcases the capabilities of IndustryMind AI.
