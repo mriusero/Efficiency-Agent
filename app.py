@@ -1,6 +1,7 @@
 import gradio as gr
 
 from src.chat import respond
+from src.production.flow import play_fn, pause_fn, reset_fn
 
 custom_theme = gr.themes.Base(
     primary_hue="blue",
@@ -28,21 +29,34 @@ with gr.Blocks(theme=custom_theme) as demo:
                 with gr.Row():
                     with gr.Column(scale=2):
                         with gr.Group():
-                            button1 = gr.Button("Start Production")
-                            button2 = gr.Button("Restart Production")
-                            button3 = gr.Button("Stop Production")
-
-                            output1 = gr.Textbox(label="Sortie", visible=False)
-                            output2 = gr.Textbox(label="Sortie", visible=False)
-                            output3 = gr.Textbox(label="Sortie", visible=False)
-
-                            button1.click(fn=None, outputs=output1)
-                            button2.click(fn=None, outputs=output2)
-                            button3.click(fn=None, outputs=output3)
+                            play = gr.Button("▶️ Play")
+                            pause = gr.Button("⏸️ Pause")
+                            reset = gr.Button("🔄 Reset")
 
             with gr.Column(scale=2):
-                with gr.Group():
-                    gr.Markdown('### Display Graphs here')
+                display_df = gr.DataFrame(
+                    label="Production Data",
+                    headers=[
+                        "Part ID", "Timestamp", "Position", "Orientation", "Tool ID",
+                        "Compliance", "Event", "Error Code", "Error Description",
+                        "Downtime Start", "Downtime End"
+                    ]
+                )
+                play.click(
+                        fn=play_fn,
+                        inputs=None,
+                        outputs=display_df,
+                    )
+                pause.click(
+                    fn=pause_fn,
+                    inputs=None,
+                    outputs=None
+                )
+                reset.click(
+                    fn=reset_fn,
+                    inputs=None,
+                    outputs=None
+                )
 
     with gr.Tab("Description"):
         gr.Markdown(
