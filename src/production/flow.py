@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from .downtime import machine_errors
+from .processing import process
 
 PRODUCTION = False
 PROD_STATE = {
@@ -32,7 +33,7 @@ def synthetic_data():
         if not PRODUCTION:
             break
 
-        if random.random() < 0.001:
+        if random.random() < 0.2:
             error_key = random.choice(list(machine_errors.keys()))
             error = machine_errors[error_key]
             downtime = error["downtime"]
@@ -69,7 +70,7 @@ def synthetic_data():
 
             print(f"     - part {part_id} data generated")
             part_id += 1
-            time.sleep(1)
+            time.sleep(0.5)
 
         current_time += timedelta(seconds=1)
 
@@ -79,13 +80,13 @@ def synthetic_data():
 
     return data
 
-def update_display(data):
+def compile(data):
     """
     Update production data in real-time.
     """
-    display_data = []
+    raw_data = []
     for row in data:
-        display_data.append({
+        raw_data.append({
             "Part ID": row.get("part_id", "N/A"),
             "Timestamp": row.get("timestamp", "N/A"),
             "Position": row.get("position", "N/A"),
@@ -98,28 +99,28 @@ def update_display(data):
             "Downtime Start": row.get("downtime_start", "N/A"),
             "Downtime End": row.get("downtime_end", "N/A")
         })
-    return pd.DataFrame(display_data)
+    return pd.DataFrame(raw_data)
 
 
 def play_fn():
     """
     Start the production simulation and generate synthetic data.
     """
-    print("=== Continuation production ===")
+    print("=== STARTING PRODUCTION ===")
     global PRODUCTION
     PRODUCTION = True
     while PRODUCTION:
         data = synthetic_data()
-        display_data = update_display(data)
-        yield display_data
-        time.sleep(1)
+        raw_data = compile(data)
+        yield raw_data
+        process(raw_data)
 
 
 def pause_fn():
     """
     Pause the production simulation.
     """
-    print("=== Stopping production ===")
+    print("--- PAUSE ---")
     global PRODUCTION
     PRODUCTION = False
 

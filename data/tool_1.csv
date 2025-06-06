@@ -1,0 +1,3 @@
+Part ID,Timestamp,Position,Orientation,Tool ID,Compliance,Event,Error Code,Error Description,Downtime Start,Downtime End,pos_rolling_mean,pos_rolling_std,pos_rolling_cp,pos_rolling_cpk,ori_rolling_mean,ori_rolling_std,ori_rolling_cp,ori_rolling_cpk
+4,2025-06-06 16:24:31,0.3607,0.3622,1,OK,N/A,N/A,N/A,N/A,N/A,0.3607,,,,0.3622,,,
+8,2025-06-06 21:39:38,0.3889,0.2458,1,OK,N/A,N/A,N/A,N/A,N/A,0.3748,0.019940411229460643,1.6716472368476298,1.2503921331620276,0.304,0.08230722933011414,0.8099734034210165,0.42118616977892853

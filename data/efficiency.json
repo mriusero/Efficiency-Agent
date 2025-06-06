@@ -1,0 +1,14 @@
+{
+    "opening_time": "0 days 08:30:15",
+    "required_time": "0 days 08:30:15",
+    "unplanned_stop_time": "0 days 08:30:00",
+    "operating_time": "0 days 00:00:15",
+    "net_time": "0 days 00:00:15",
+    "useful_time": "0 days 00:00:08",
+    "quality_rate": 56.25,
+    "operating_rate": 100.0,
+    "availability_rate": 0.04899559039686428,
+    "TRS": 0.02756001959823616,
+    "MTBF": "0 days 00:00:03",
+    "MTTR": "0 days 01:42:00"
+}
