@@ -118,7 +118,7 @@ def play_fn():
         yield [tools_dfs[key] for key in tools_dfs.keys()] + [machine_json]
 
 
-def pause_fn():
+def stop_fn():
     """
     Pause the production simulation.
     """
