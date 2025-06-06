@@ -15,8 +15,8 @@ custom_theme = gr.themes.Base(
 with gr.Blocks(theme=custom_theme) as demo:
 
         # CHAT_INTERFACE
-        gr.Markdown("# IndustryMind AI ⚡️")
-        gr.Markdown("### *An industrial production intelligence (WIP)*")
+        gr.Markdown("# AI Industrial Efficiency Helper ⚡️")
+        gr.Markdown("### *A production efficiency intelligence, for industries & services (WIP)*")
         gr.Markdown(
             """
             This demo showcases the capabilities of IndustryMind AI.
