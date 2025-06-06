@@ -23,7 +23,7 @@ with gr.Blocks(theme=custom_theme) as demo:
             You can interact with the chatbot to get insights and assistance on production-related queries.
             """
         )
-        with gr.Sidebar(width=700, visible=False):
+        with gr.Sidebar(width=700, visible=True):
             gr.Markdown("# Ask Agent")
             gr.HTML("<div style='margin-bottom: 20px;'></div>")
             gr.Markdown(
