@@ -1,8 +1,8 @@
 import gradio as gr
-
 from src.chat import respond
 
-def sidebar_ui(width=700, visible=True):
+
+def sidebar_ui(state, width=700, visible=True):
     with gr.Sidebar(width=width, visible=visible):
         gr.Markdown("# Ask Agent")
         gr.Markdown(
@@ -22,3 +22,13 @@ def sidebar_ui(width=700, visible=True):
         )
         gr.HTML("<div style='margin-bottom: 40px;'></div>")
         chatbot = gr.ChatInterface(respond, type='messages')
+        sessions_state = gr.JSON(
+            label="Sessions State",
+            visible=True,
+            value=state.value,
+        )
+        state.change(
+            fn=lambda x: x,
+            inputs=state,
+            outputs=sessions_state,
+        )

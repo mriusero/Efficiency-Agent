@@ -1,6 +1,7 @@
 import gradio as gr
 
 from src.ui import sidebar_ui, dashboard_ui
+from src.ui.session import session_state
 
 custom_theme = gr.themes.Base(
     primary_hue="blue",
@@ -8,6 +9,14 @@ custom_theme = gr.themes.Base(
     neutral_hue="gray",
     font=[gr.themes.GoogleFont("Open Sans"), "sans-serif"],
 )
+
+STATE = {
+    "running": False,
+    "current_time": None,
+    "part_id": None,
+    "data": {},
+    "machine": {},
+}
 
 with gr.Blocks(theme=custom_theme) as demo:
 
@@ -20,11 +29,16 @@ with gr.Blocks(theme=custom_theme) as demo:
             You can interact with the chatbot to get insights and assistance on production-related queries.
             """
         )
+
+        state = gr.State(STATE)
+
         # CHAT INTERFACE
-        sidebar_ui(width=700, visible=True)
+        sidebar_ui(state, width=700, visible=True)
 
         # DASHBOARD
-        dashboard_ui()
+        with gr.Tab("Dashboard"):
+            session_state(state)
+            dashboard_ui(state)
 
         # DESCRIPTION
         with gr.Tab("Description"):
