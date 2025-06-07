@@ -1,29 +1,19 @@
-import os
 import time
-import json
 import random
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
 from .downtime import machine_errors
-from .processing import process
 
-PRODUCTION = False
-PROD_STATE = {
-    "current_time": None,
-    "part_id": None,
-    "data": None
-}
-
-def synthetic_data():
+def generate_data(state):
     """
     Generate synthetic production data for a manufacturing process.
     """
-    global PROD_STATE
-    data = PROD_STATE["data"] if PROD_STATE["data"] else []
-    current_time = PROD_STATE["current_time"] if PROD_STATE["current_time"] else datetime.now()
-    part_id = PROD_STATE["part_id"] if PROD_STATE["part_id"] else 1
+    current_time = state["current_time"] if state["current_time"] else datetime.now()
+    part_id = state["part_id"] if state["part_id"] else 0
+    if 'raw' not in state['data']:
+        state['data']['raw'] = []
     non_compliance_rates = {
         1: 0.05,
         2: 0.10,
@@ -32,7 +22,7 @@ def synthetic_data():
     }
 
     for _ in range(1000):
-        if not PRODUCTION:
+        if not state["running"]:
             break
 
         if random.random() < 0.2:
@@ -40,7 +30,7 @@ def synthetic_data():
             error = machine_errors[error_key]
             downtime = error["downtime"]
 
-            data.append({
+            state['data']['raw'].append({
                 "timestamp": current_time.strftime("%Y-%m-%d %H:%M:%S"),
                 "event": "Machine Error",
                 "error_code": error_key,
@@ -61,7 +51,7 @@ def synthetic_data():
 
             compliance = 'OK' if (0.3 <= position <= 0.5) and (0.2 <= orientation <= 0.6) else 'NOK'
 
-            data.append({
+            state['data']['raw'].append({
                 "part_id": part_id,
                 "timestamp": current_time.strftime("%Y-%m-%d %H:%M:%S"),
                 "position": round(position, 4),
@@ -76,18 +66,11 @@ def synthetic_data():
 
         current_time += timedelta(seconds=1)
 
-    PROD_STATE["data"] = data
-    PROD_STATE["current_time"] = current_time
-    PROD_STATE["part_id"] = part_id
+    state["current_time"] = current_time
+    state["part_id"] = part_id
 
-    return data
-
-def compile(data):
-    """
-    Update production data in real-time.
-    """
     raw_data = []
-    for row in data:
+    for row in state['data']['raw']:
         raw_data.append({
             "Part ID": row.get("part_id", "N/A"),
             "Timestamp": row.get("timestamp", "N/A"),
@@ -101,42 +84,5 @@ def compile(data):
             "Downtime Start": row.get("downtime_start", "N/A"),
             "Downtime End": row.get("downtime_end", "N/A")
         })
-    return pd.DataFrame(raw_data)
 
-
-def play_fn():
-    """
-    Start the production simulation and generate synthetic data.
-    """
-    print("=== STARTING PRODUCTION ===")
-    global PRODUCTION
-    PRODUCTION = True
-    while PRODUCTION:
-        data = synthetic_data()
-        raw_data = compile(data)
-        tools_dfs, machine_json = process(raw_data)
-        yield [tools_dfs[key] for key in tools_dfs.keys()] + [machine_json]
-
-
-def stop_fn():
-    """
-    Pause the production simulation.
-    """
-    print("--- PAUSE ---")
-    global PRODUCTION
-    PRODUCTION = False
-
-
-def reset_fn():
-    """
-    Reset the production state and clear the data.
-    """
-    os.system('clear')
-    print("=== RESET DONE ===")
-    global PRODUCTION, PROD_STATE
-    PRODUCTION = False
-    PROD_STATE = {
-        "current_time": None,
-        "part_id": None,
-        "data": None
-    }
+    state['data']['raw_df'] = pd.DataFrame(raw_data)
