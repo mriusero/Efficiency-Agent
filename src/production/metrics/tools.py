@@ -35,7 +35,7 @@ def process_unique_tool(tool, raw_data):
     return tool, tool_data
 
 
-def get_tools_metrics(raw_data):
+def tools_metrics(raw_data):
     """
     Process the raw production data to extract tool metrics in parallel.
     """
