@@ -20,7 +20,6 @@ async def generate_data(state):
         4: 0.07
     }
 
-    # Initialize raw_df if it doesn't exist
     if 'raw_df' not in state['data']:
         state['data']['raw_df'] = pd.DataFrame(columns=[
             "Part ID", "Timestamp", "Position", "Orientation", "Tool ID",
@@ -79,9 +78,17 @@ async def generate_data(state):
                 "Downtime End": "N/A"
             }])
 
-            state['data']['raw_df'] = pd.concat([state['data']['raw_df'], new_row], ignore_index=True)
+            if (
+                    (not new_row.empty and not new_row.isna().all().all())
+                and \
+                    (not state['data']['raw_df'].empty and not state['data']['raw_df'].isna().all().all())
+            ):
+                state['data']['raw_df'] = pd.concat([state['data']['raw_df'], new_row], ignore_index=True)
 
-            print(f"     - part {part_id} data generated")
+            elif not new_row.empty and not new_row.isna().all().all():
+                state['data']['raw_df'] = new_row.copy()
+
+            print(f"- part {part_id} data generated")
             part_id += 1
             await asyncio.sleep(0.2)
 

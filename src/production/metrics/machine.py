@@ -1,51 +1,40 @@
 import pandas as pd
 
 async def machine_metrics(raw_data):
-    """
-    Calculate machine efficiency metrics from raw production data.
-    :param raw_data: collection of raw production data containing timestamps, downtime, and compliance information.
-    :return: a dictionary with calculated metrics including opening time, required time, unplanned stop time, operating time, net time, useful time, quality rate, operating rate, availability rate, TRS (Total Resource Score), MTBF (Mean Time Between Failures), and MTTR (Mean Time To Repair).
-    """
     df = pd.DataFrame(raw_data)
-    df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-    df['Downtime Start'] = pd.to_datetime(df['Downtime Start'], format="%Y-%m-%d %H:%M:%S", errors='coerce')
-    df['Downtime End'] = pd.to_datetime(df['Downtime End'], format="%Y-%m-%d %H:%M:%S", errors='coerce')
 
-    opening_time = df['Timestamp'].max() - df['Timestamp'].min()        # Calculate opening time
-    planned_stop_time = pd.Timedelta(0)                                 # Planned stop time (not implemented)
-    required_time = opening_time - planned_stop_time
+    datetime_cols = ['Timestamp', 'Downtime Start', 'Downtime End']
+    for col in datetime_cols:
+        df[col] = pd.to_datetime(df[col], errors='coerce', format="%Y-%m-%d %H:%M:%S")
 
-    downtime_df = df.dropna(subset=['Downtime Start', 'Downtime End'])                              # Create a subset for calculating unplanned stop time
-    unplanned_stop_time = (downtime_df['Downtime End'] - downtime_df['Downtime Start']).sum()       # Calculate unplanned stop time
-    operating_time = required_time - unplanned_stop_time                                            # Operating time
+    opening_time = df['Timestamp'].max() - df['Timestamp'].min()
+    required_time = opening_time  # planned_stop_time = 0 non implémenté
 
-    cadency_variance = pd.Timedelta(0)                  # Cadency variance (not implemented)
-    net_time = operating_time - cadency_variance        # Net time
+    downtime_df = df.dropna(subset=['Downtime Start', 'Downtime End'])
+    unplanned_stop_time = (downtime_df['Downtime End'] - downtime_df['Downtime Start']).sum()
+    operating_time = required_time - unplanned_stop_time
 
-    nok_time = df[df['Compliance'] != 'OK']['Timestamp'].count()        # Time NOK (non-compliant)
-    useful_time = net_time - pd.Timedelta(seconds=nok_time)             # Useful time
+    net_time = operating_time  # cadency_variance = 0 non implémenté
 
-    total_parts = df['Part ID'].count()                                         # Compliance metrics
-    compliant_parts = df[df['Compliance'] == 'OK']['Compliance'].count()
+    nok_count = (df['Compliance'] != 'OK').sum()
+    useful_time = net_time - pd.Timedelta(seconds=nok_count)
 
-    quality_rate = (compliant_parts / total_parts) * 100            # Quality rate
-    operating_rate = (net_time / operating_time) * 100              # Operating rate
-    availability_rate = (operating_time / required_time) * 100      # Availability rate
+    total_parts = len(df)
+    compliant_parts = (df['Compliance'] == 'OK').sum()
 
-    # Overall Equipment Effectiveness (OEE)
+    operating_sec = operating_time.total_seconds()
+    net_sec = net_time.total_seconds()
+    required_sec = required_time.total_seconds()
+
+    quality_rate = (compliant_parts / total_parts) * 100 if total_parts > 0 else 0
+    operating_rate = (net_sec / operating_sec) * 100 if operating_sec > 0 else 0
+    availability_rate = (operating_sec / required_sec) * 100 if required_sec > 0 else 0
+
     TRS = (quality_rate / 100) * (operating_rate / 100) * (availability_rate / 100) * 100
 
-    # Mean Time Between Failures (MTBF)
-    if len(downtime_df) > 0:
-        mtbf = operating_time / len(downtime_df)
-    else:
-        mtbf = pd.Timedelta(0)
-
-    # Mean Time To Repair (MTTR)
-    if len(downtime_df) > 0:
-        mttr = unplanned_stop_time / len(downtime_df)
-    else:
-        mttr = pd.Timedelta(0)
+    downtime_count = len(downtime_df)
+    mtbf = operating_time / downtime_count if downtime_count > 0 else pd.Timedelta(0)
+    mttr = unplanned_stop_time / downtime_count if downtime_count > 0 else pd.Timedelta(0)
 
     return {
         "opening_time": str(opening_time),

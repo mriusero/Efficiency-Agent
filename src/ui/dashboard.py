@@ -20,7 +20,6 @@ async def dataflow(state):
 
     if state['running']:
         if 'gen_task' not in state or state['gen_task'] is None or state['gen_task'].done():
-            print("Launching generate_data in background")
             state['gen_task'] = asyncio.create_task(generate_data(state))
 
     raw_data = state['data'].get('raw_df', pd.DataFrame())

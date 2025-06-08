@@ -1,15 +1,9 @@
 import numpy as np
+import pandas as pd
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 def stats_metrics(data, column, usl, lsl):
-    """
-    Calculate rolling mean, standard deviation, Cp, and Cpk for a given column.
-    Args:
-        data (pd.DataFrame): DataFrame containing the production data.
-        column (str): The column for which to calculate metrics.
-        usl (float): Upper specification limit.
-        lsl (float): Lower specification limit.
-    """
     rolling_mean = data[column].expanding().mean()
     rolling_std = data[column].expanding().std()
     cp = (usl - lsl) / (6 * rolling_std)
@@ -20,37 +14,35 @@ def stats_metrics(data, column, usl, lsl):
     cpk[rolling_std == 0] = 0
     return rolling_mean, rolling_std, cp, cpk
 
-
-async def process_unique_tool(tool, raw_data):
-    """
-    Process data for a single tool and save the results to a CSV file.
-    Args:
-        tool (str): Tool ID to process.
-        raw_data (pd.DataFrame): DataFrame containing the raw production data.
-    """
-    tool_data = raw_data[raw_data['Tool ID'] == tool].copy()
-    tool_data = tool_data[tool_data['Tool ID'] != 'N/A']
+def process_unique_tool(tool, tool_data):
     tool_data['pos_rolling_mean'], tool_data['pos_rolling_std'], tool_data['pos_rolling_cp'], tool_data['pos_rolling_cpk'] = stats_metrics(tool_data, 'Position', 0.5, 0.3)
     tool_data['ori_rolling_mean'], tool_data['ori_rolling_std'], tool_data['ori_rolling_cp'], tool_data['ori_rolling_cpk'] = stats_metrics(tool_data, 'Orientation', 0.6, 0.2)
     return tool, tool_data
 
-
 async def tools_metrics(raw_data):
-    """
-    Process the raw production data to extract tool metrics in parallel.
-    """
-    metrics = {}
-    tools = raw_data['Tool ID'].unique()
+    filtered_data = raw_data[raw_data['Tool ID'] != 'N/A']
+    tools = filtered_data['Tool ID'].unique()
 
-    tasks = [process_unique_tool(tool, raw_data) for tool in tools]
-    results = await asyncio.gather(*tasks)
+    loop = asyncio.get_running_loop()
+    metrics = {}
+
+    with ThreadPoolExecutor() as executor:
+        tasks = [
+            loop.run_in_executor(
+                executor,
+                process_unique_tool,
+                tool,
+                filtered_data[filtered_data['Tool ID'] == tool].copy()
+            )
+            for tool in tools
+        ]
+
+        results = await asyncio.gather(*tasks)
 
     for tool, tool_data in results:
         metrics[f"tool_{tool}"] = tool_data
 
-    # Calculate metrics for all tools together
-    all_tools_data = raw_data.copy()
-    all_tools_data = all_tools_data[all_tools_data['Tool ID'] != 'N/A']
+    all_tools_data = filtered_data.copy()
     all_tools_data['pos_rolling_mean'], all_tools_data['pos_rolling_std'], all_tools_data['pos_rolling_cp'], all_tools_data['pos_rolling_cpk'] = stats_metrics(all_tools_data, 'Position', 0.5, 0.3)
     all_tools_data['ori_rolling_mean'], all_tools_data['ori_rolling_std'], all_tools_data['ori_rolling_cp'], all_tools_data['ori_rolling_cpk'] = stats_metrics(all_tools_data, 'Orientation', 0.6, 0.2)
     metrics['all'] = all_tools_data
