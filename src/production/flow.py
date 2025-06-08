@@ -83,7 +83,7 @@ async def generate_data(state):
 
             print(f"     - part {part_id} data generated")
             part_id += 1
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.2)
 
         current_time += timedelta(seconds=1)
 
