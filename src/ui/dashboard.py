@@ -1,30 +1,45 @@
 import gradio as gr
 import pandas as pd
 import asyncio
+from functools import partial
 
 from src.production.flow import generate_data
 from src.production.metrics.tools import tools_metrics
 from src.production.metrics.machine import machine_metrics, fetch_issues
 from src.ui.graphs.tools_graphs import ToolMetricsDisplay
 
+MAX_ROWS = 1000
+
+def hash_dataframe(df):
+    """Computes a simple hash to detect changes in the DataFrame."""
+    return pd.util.hash_pandas_object(df).sum()
 
 async def dataflow(state):
     """
-    Main dataflow function that processes raw production data and updates the state with tool metrics, machine efficiency, and issues.
+    Main function that updates data if necessary.
+    Avoids processing if the raw data hasn't changed.
     """
-    if 'tools' not in state['data']:
-        state['data']['tools'] = {}
+    state.setdefault('data', {}).setdefault('tools', {})
+    state['data'].setdefault('issues', {})
 
-    if 'issues' not in state['data']:
-        state['data']['issues'] = {}
-
-    if state['running']:
+    if state.get('running'):
         if 'gen_task' not in state or state['gen_task'] is None or state['gen_task'].done():
             state['gen_task'] = asyncio.create_task(generate_data(state))
 
     raw_data = state['data'].get('raw_df', pd.DataFrame())
     if raw_data.empty:
         return [pd.DataFrame()] * 4
+
+    if len(raw_data) > MAX_ROWS:
+        raw_data = raw_data.tail(MAX_ROWS)
+
+    current_hash = hash_dataframe(raw_data)
+    if state.get('last_hash') == current_hash:
+        return [
+            pd.DataFrame(state['data']['tools'].get(f'tool_{i}', pd.DataFrame()))
+            for i in range(1, 5)
+        ]
+    state['last_hash'] = current_hash
 
     tools_data = await tools_metrics(raw_data)
     tools_data = {tool: df for tool, df in tools_data.items() if not df.empty}
@@ -42,13 +57,11 @@ async def dataflow(state):
         for i in range(1, 5)
     ]
 
-
-def create_display_and_plots(df):
+def update_display_and_plots(df, display):
     """
-    Create a ToolMetricsDisplay instance and generate plots for the provided DataFrame.
+    Uses an existing instance of ToolMetricsDisplay to generate plots.
     """
-    display = ToolMetricsDisplay()
-    plots = [
+    return [
         display.normal_curve(df, cote='pos'),
         display.gauge(df, type='cp', cote='pos'),
         display.gauge(df, type='cpk', cote='pos'),
@@ -57,12 +70,10 @@ def create_display_and_plots(df):
         display.gauge(df, type='cpk', cote='ori'),
         display.control_graph(df),
     ]
-    return display, plots
-
 
 def init_displays_and_blocks(n=4):
     """
-    Initialize a list of ToolMetricsDisplay instances and their corresponding blocks.
+    Initializes the graphical objects (ToolMetricsDisplay) and their associated blocks.
     """
     displays = []
     blocks = []
@@ -72,24 +83,27 @@ def init_displays_and_blocks(n=4):
         blocks.extend(display.tool_block(df=pd.DataFrame(), id=i))
     return displays, blocks
 
-
-def dashboard_ui(state):
+async def on_tick(state, displays):
     """
-    Create the Gradio UI for the dashboard, initializing displays and setting up the dataflow.
+    Tick function called periodically: updates plots only if data has changed.
+    Uses a lock to prevent concurrent execution.
     """
-    displays, initial_plots = init_displays_and_blocks()
-
-    async def on_tick(state):
+    async with state.setdefault('lock', asyncio.Lock()):
         dfs = await dataflow(state)
         all_plots = []
-        for df in dfs:
-            _, plots = create_display_and_plots(df)
+        for df, display in zip(dfs, displays):
+            plots = update_display_and_plots(df, display)
             all_plots.extend(plots)
         return all_plots + [state]
 
-    timer = gr.Timer(0.1)
+def dashboard_ui(state):
+    """
+    Creates the Gradio interface and sets a refresh every second.
+    """
+    displays, initial_plots = init_displays_and_blocks()
+    timer = gr.Timer(1.0)
     timer.tick(
-        fn=on_tick,
+        fn=partial(on_tick, displays=displays),
         inputs=[state],
         outputs=initial_plots + [state]
     )
