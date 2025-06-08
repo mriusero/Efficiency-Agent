@@ -9,6 +9,7 @@ from src.production.metrics.machine import machine_metrics, fetch_issues
 from src.ui.graphs.tools_graphs import ToolMetricsDisplay
 
 MAX_ROWS = 1000
+TOOLS_COUNT = 2
 
 def hash_dataframe(df):
     """Computes a simple hash to detect changes in the DataFrame."""
@@ -28,7 +29,7 @@ async def dataflow(state):
 
     raw_data = state['data'].get('raw_df', pd.DataFrame())
     if raw_data.empty:
-        return [pd.DataFrame()] * 4
+        return [pd.DataFrame()] * TOOLS_COUNT
 
     if len(raw_data) > MAX_ROWS:
         raw_data = raw_data.tail(MAX_ROWS)
@@ -37,7 +38,7 @@ async def dataflow(state):
     if state.get('last_hash') == current_hash:
         return [
             pd.DataFrame(state['data']['tools'].get(f'tool_{i}', pd.DataFrame()))
-            for i in range(1, 5)
+            for i in range(1, TOOLS_COUNT+1)
         ]
     state['last_hash'] = current_hash
 
@@ -54,7 +55,7 @@ async def dataflow(state):
 
     return [
         pd.DataFrame(state['data']['tools'].get(f'tool_{i}', pd.DataFrame()))
-        for i in range(1, 5)
+        for i in range(1, TOOLS_COUNT+1)
     ]
 
 def update_display_and_plots(df, display):
@@ -71,7 +72,7 @@ def update_display_and_plots(df, display):
         display.control_graph(df),
     ]
 
-def init_displays_and_blocks(n=4):
+def init_displays_and_blocks(n=TOOLS_COUNT):
     """
     Initializes the graphical objects (ToolMetricsDisplay) and their associated blocks.
     """

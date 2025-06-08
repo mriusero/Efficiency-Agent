@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 
 from .downtime import machine_errors
 
+TOOLS_COUNT = 2
+
 async def generate_data(state):
     """
     Generate synthetic production data for a manufacturing process.
@@ -16,8 +18,6 @@ async def generate_data(state):
     non_compliance_rates = {
         1: 0.05,
         2: 0.10,
-        3: 0.03,
-        4: 0.07
     }
 
     if 'raw_df' not in state['data']:
@@ -56,7 +56,7 @@ async def generate_data(state):
         else:
             position = np.random.normal(loc=0.4, scale=0.03)
             orientation = np.random.normal(loc=0.4, scale=0.06)
-            tool_id = (part_id % 4) + 1
+            tool_id = (part_id % TOOLS_COUNT) + 1
 
             if random.random() < non_compliance_rates[tool_id]:
                 position = np.random.normal(loc=0.4, scale=0.2)
