@@ -88,7 +88,7 @@ async def generate_data(state):
             elif not new_row.empty and not new_row.isna().all().all():
                 state['data']['raw_df'] = new_row.copy()
 
-            print(f"- part {part_id} data generated")
+            #print(f"- part {part_id} data generated")
             part_id += 1
             await asyncio.sleep(0.2)
 
