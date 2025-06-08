@@ -6,13 +6,13 @@ def show_toast(text):
 
 def play_fn(state):
     state['running'] = True
-    print("\n\n===== Production started =====\n\n")
+    print("\n\n===== Production started =====")
     show_toast("Production started !")
     return state
 
 def stop_fn(state):
     state['running'] = False
-    print("\n\n----- Production stopped -----\n\n")
+    print("----- Production stopped -----")
     show_toast("Production paused !")
     return  state
 
@@ -22,7 +22,7 @@ def reset_fn(state):
     state['part_id'] = None
     state['data'] = {}
     state['machine'] = {}
-    print("\n\n... production reinitialised successfully ...\n\n")
+    print("----- Production rested -----\n\n")
     show_toast("Production reset !")
     return state
 

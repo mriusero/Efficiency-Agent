@@ -1,7 +1,7 @@
-import numpy as np
-from scipy.stats import norm
-import plotly.graph_objects as go
 import gradio as gr
+import numpy as np
+import plotly.graph_objects as go
+from scipy.stats import norm
 
 
 class ToolMetricsDisplay:

@@ -1,5 +1,5 @@
 import gradio as gr
-import plotly.express as px
+
 
 class GeneralMetricsDisplay:
     def __init__(self):

@@ -1,8 +1,9 @@
+import asyncio
 import random
+from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
-import asyncio
-from datetime import datetime, timedelta
 
 from .downtime import machine_errors
 

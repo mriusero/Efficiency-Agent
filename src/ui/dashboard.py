@@ -1,13 +1,14 @@
-import gradio as gr
-import pandas as pd
 import asyncio
 from functools import partial
 
+import gradio as gr
+import pandas as pd
+
 from src.production.flow import generate_data
-from src.production.metrics.tools import tools_metrics
 from src.production.metrics.machine import machine_metrics, fetch_issues
-from src.ui.graphs.tools_graphs import ToolMetricsDisplay
+from src.production.metrics.tools import tools_metrics
 from src.ui.graphs.general_graphs import GeneralMetricsDisplay
+from src.ui.graphs.tools_graphs import ToolMetricsDisplay
 
 MAX_ROWS = 1000
 TOOLS_COUNT = 2
