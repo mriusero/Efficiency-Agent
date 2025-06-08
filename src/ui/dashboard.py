@@ -17,6 +17,7 @@ def hash_dataframe(df):
     """Computes a simple hash to detect changes in the DataFrame."""
     return pd.util.hash_pandas_object(df).sum()
 
+
 async def dataflow(state):
     """
     Main function that updates data if necessary.
@@ -101,6 +102,8 @@ def init_components(n=TOOLS_COUNT):
     - tool_plots: list of tool-related Gradio components
     - general_plots: list of general-related Gradio components
     """
+    print("Initializing components...")
+
     displays = []
     tool_plots = []
     general_plots = []
@@ -109,7 +112,7 @@ def init_components(n=TOOLS_COUNT):
     main_display = GeneralMetricsDisplay()
     displays.append(main_display)
     general_plots.extend(
-            main_display.block(
+            main_display.general_block(
             all_tools_df=pd.DataFrame(),
             issues_df=pd.DataFrame(),
             efficiency_data={}
@@ -127,11 +130,9 @@ def init_components(n=TOOLS_COUNT):
 async def on_tick(state, displays):
     """
     Tick function called periodically to update plots if data has changed.
-
     Handles:
     - Tool-specific plots (tool_1, tool_2, ..., tool_n)
     - General plots (all tools, issues, efficiency)
-
     Returns two lists of plots separately for tools and general metrics, plus state.
     """
     async with state.setdefault('lock', asyncio.Lock()):
@@ -146,32 +147,26 @@ async def on_tick(state, displays):
         general_plots = []
         general_display = displays[0]
         general_plots.extend(
-                general_display.update(
+            general_display.refresh(
                 all_tools_df=all_tools_df,
                 issues_df=issues_df,
                 efficiency_data=efficiency_data
             )
         )
+
         # Update tool-specific plots
         tool_plots = []
         for df, display in zip(tool_dfs, displays[1:]):
             tool_plots.extend(
-                [
-                    display.normal_curve(df, cote='pos'),
-                    display.gauge(df, type='cp', cote='pos'),
-                    display.gauge(df, type='cpk', cote='pos'),
-                    display.normal_curve(df, cote='ori'),
-                    display.gauge(df, type='cp', cote='ori'),
-                    display.gauge(df, type='cpk', cote='ori'),
-                    display.control_graph(df),
-                ]
+                display.refresh(
+                    df=df
+                )
             )
         return tool_plots + general_plots + [state]
 
 def dashboard_ui(state):
     """
     Creates the Gradio interface and sets a refresh every second.
-
     The outputs are separated into two groups for tools and general metrics to
     preserve layout order and grouping.
     """

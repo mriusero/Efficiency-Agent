@@ -32,7 +32,7 @@ async def generate_data(state):
         if not state["running"]:
             break
 
-        if random.random() < 0.2:
+        if random.random() < 0.01:     # 0.005
             error_key = random.choice(list(machine_errors.keys()))
             error = machine_errors[error_key]
             downtime = error["downtime"]

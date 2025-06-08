@@ -8,29 +8,28 @@ async def machine_metrics(raw_data):
         df[col] = pd.to_datetime(df[col], errors='coerce', format="%Y-%m-%d %H:%M:%S")
 
     opening_time = df['Timestamp'].max() - df['Timestamp'].min()
-    required_time = opening_time  # planned_stop_time = 0 non implémenté
+    required_time = opening_time
+    # planned_stop_time = 0 non implémenté
 
     downtime_df = df.dropna(subset=['Downtime Start', 'Downtime End'])
     unplanned_stop_time = (downtime_df['Downtime End'] - downtime_df['Downtime Start']).sum()
     operating_time = required_time - unplanned_stop_time
 
-    net_time = operating_time  # cadency_variance = 0 non implémenté
+    net_time = operating_time
+    # cadency_variance = 0 non implémenté
 
     nok_count = (df['Compliance'] != 'OK').sum()
     useful_time = net_time - pd.Timedelta(seconds=nok_count)
-
-    total_parts = len(df)
-    compliant_parts = (df['Compliance'] == 'OK').sum()
 
     operating_sec = operating_time.total_seconds()
     net_sec = net_time.total_seconds()
     required_sec = required_time.total_seconds()
 
-    quality_rate = (compliant_parts / total_parts) * 100 if total_parts > 0 else 0
+    quality_rate = (useful_time / net_time) * 100 if net_time else 0
     operating_rate = (net_sec / operating_sec) * 100 if operating_sec > 0 else 0
     availability_rate = (operating_sec / required_sec) * 100 if required_sec > 0 else 0
 
-    TRS = (quality_rate / 100) * (operating_rate / 100) * (availability_rate / 100) * 100
+    OEE = (quality_rate / 100) * (operating_rate / 100) * (availability_rate / 100) * 100
 
     downtime_count = len(downtime_df)
     mtbf = operating_time / downtime_count if downtime_count > 0 else pd.Timedelta(0)
@@ -46,7 +45,7 @@ async def machine_metrics(raw_data):
         "quality_rate": quality_rate,
         "operating_rate": operating_rate,
         "availability_rate": availability_rate,
-        "TRS": TRS,
+        "OEE": OEE,
         "MTBF": str(mtbf),
         "MTTR": str(mttr)
     }

@@ -13,21 +13,23 @@ class ToolMetricsDisplay:
 
     @staticmethod
     def gauge(df, type=None, cote=None):
+        width = 205
+        height = 150
+        margin = dict(l=30, r=50, t=50, b=0)
         if df is None or df.empty:
             fig = go.Figure()
             fig.update_layout(
                 template='plotly_dark',
-                width=200,
-                height=170,
-                margin=dict(l=30, r=50, t=30, b=0),
+                width=width,
+                height=height,
+                margin=margin,
                 annotations=[dict(
-                    text="No data available",
+                    text="No data",
                     showarrow=False,
                     font=dict(size=16, color="white")
                 )]
             )
             return fig
-
         column = f"{cote}_rolling_{type}"
         idx = df['Timestamp'].idxmax()
         value = df.loc[idx, column]
@@ -50,74 +52,110 @@ class ToolMetricsDisplay:
         ))
         fig.update_layout(
             template='plotly_dark',
-            width=200,
-            height=170,
-            margin=dict(l=30, r=50, t=30, b=0),
+            width=width,
+            height=height,
+            margin=margin,
         )
         return fig
 
     def control_graph(self, df):
+        width = 832
+        height = 400
+        margin = dict(l=70, r=100, t=30, b=70)
         if df is None or df.empty:
             fig = go.Figure()
             fig.update_layout(
                 template='plotly_dark',
                 xaxis_title='Timestamp',
-                yaxis_title='Valeurs',
+                yaxis_title='Values',
                 showlegend=True,
-                width=720,
-                height=400,
-                margin=dict(l=70, r=10, t=30, b=70),
+                width=width,
+                height=height,
+                margin=margin,
                 annotations=[dict(
-                    text="No data available",
+                    text="No data",
                     showarrow=False,
                     font=dict(size=20, color="white")
                 )]
             )
             return fig
-
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=[0.3] * len(df), mode='lines',
-                                 line=dict(dash='dot', color=self.pos_color, width=1), name='lsl pos'))
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=[0.5] * len(df), mode='lines',
-                                 line=dict(dash='dot', color=self.pos_color, width=1), name='usl pos'))
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=[0.2] * len(df), mode='lines',
-                                 line=dict(dash='dot', color=self.ori_color, width=1), name='lsl ori'))
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=[0.6] * len(df), mode='lines',
-                                 line=dict(dash='dot', color=self.ori_color, width=1), name='usl ori'))
         fig.add_trace(
-            go.Scatter(x=df['Timestamp'], y=df['Position'], mode='lines+markers', line=dict(color=self.pos_color),
-                       name='pos'))
+            go.Scatter(
+                x=df['Timestamp'], y=[0.3] * len(df),
+                mode='lines',
+                line=dict(dash='dot', color=self.pos_color, width=1),
+                name='lsl pos'
+            )
+        )
         fig.add_trace(
-            go.Scatter(x=df['Timestamp'], y=df['Orientation'], mode='lines+markers', line=dict(color=self.ori_color),
-                       name='ori'))
+            go.Scatter(
+                x=df['Timestamp'], y=[0.5] * len(df),
+                mode='lines',
+                line=dict(dash='dot', color=self.pos_color, width=1),
+                name='usl pos'
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=df['Timestamp'], y=[0.2] * len(df),
+                mode='lines',
+                line=dict(dash='dot', color=self.ori_color, width=1),
+                name='lsl ori'
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=df['Timestamp'], y=[0.6] * len(df),
+                mode='lines',
+                line=dict(dash='dot', color=self.ori_color, width=1),
+                name='usl ori'
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=df['Timestamp'], y=df['Position'],
+                mode='lines+markers', line=dict(color=self.pos_color),
+                name='pos'
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=df['Timestamp'], y=df['Orientation'],
+                mode='lines+markers', line=dict(color=self.ori_color),
+                name='ori'
+            )
+        )
         fig.update_layout(
             template='plotly_dark',
             xaxis_title='Timestamp',
             yaxis_title='Valeurs',
             showlegend=True,
-            width=720,
-            height=400,
-            margin=dict(l=70, r=10, t=30, b=70)
+            width=width,
+            height=height,
+            margin=margin
         )
         return fig
 
     def normal_curve(self, df, cote=None):
+        width = 410
+        height= 250
+        margin= dict(l=20, r=70, t=20, b=20)
         if df is None or df.empty:
             fig = go.Figure()
             fig.update_layout(
                 template='plotly_dark',
                 showlegend=False,
-                width=370,
-                height=250,
-                margin=dict(l=40, r=40, t=40, b=40),
+                width=width,
+                height=height,
+                margin=margin,
                 annotations=[dict(
-                    text="No data available",
+                    text="No data",
                     showarrow=False,
                     font=dict(size=16, color="white")
                 )]
             )
             return fig
-
         if cote == 'pos':
             color = self.pos_color
             lsl = 0.3
@@ -133,17 +171,30 @@ class ToolMetricsDisplay:
         x = np.linspace(mu - 3 * std, mu + 3 * std, 100)
         y = norm.pdf(x, mu, std)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Normal Curve', line=dict(color=color)))
-        fig.add_shape(type="line", x0=usl, y0=0, x1=usl, y1=max(y), line=dict(color="red", width=1, dash="dot"),
-                      name='usl')
-        fig.add_shape(type="line", x0=lsl, y0=0, x1=lsl, y1=max(y), line=dict(color="red", width=1, dash="dot"),
-                      name='lsl')
+        fig.add_trace(
+            go.Scatter(
+                x=x, y=y,
+                mode='lines',
+                name='Normal Curve',
+                line=dict(color=color)
+            )
+        )
+        fig.add_shape(
+            type="line", x0=usl, y0=0, x1=usl, y1=max(y),
+            line=dict(color="red", width=1, dash="dot"),
+            name='usl'
+        )
+        fig.add_shape(
+            type="line", x0=lsl, y0=0, x1=lsl, y1=max(y),
+            line=dict(color="red", width=1, dash="dot"),
+            name='lsl'
+        )
         fig.update_layout(
             template='plotly_dark',
             showlegend=False,
-            width=370,
-            height=250,
-            margin=dict(l=40, r=40, t=40, b=40)
+            width=width,
+            height=height,
+            margin=margin
         )
         return fig
 
@@ -162,26 +213,64 @@ class ToolMetricsDisplay:
                 gr.Markdown("### `Position`")
                 with gr.Group():
                     with gr.Row(height=250):
-                        pos_normal_plot = gr.Plot(self.normal_curve(df=df, cote='pos'))
+                        pos_normal_plot = gr.Plot(
+                            self.normal_curve(
+                                df=df, cote='pos'
+                            )
+                        )
                     with gr.Row(height=150):
-                        pos_cp_gauge = gr.Plot(self.gauge(df=df, type='cp', cote='pos'))
-                        pos_cpk_gauge = gr.Plot(self.gauge(df=df, type='cpk', cote='pos'))
+                        pos_cp_gauge = gr.Plot(
+                            self.gauge(
+                                df=df, type='cp', cote='pos'
+                            )
+                        )
+                        pos_cpk_gauge = gr.Plot(
+                            self.gauge(
+                                df=df, type='cpk', cote='pos'
+                            )
+                        )
             with gr.Column(scale=1):
                 gr.Markdown("### `Orientation`")
                 with gr.Group():
                     with gr.Row(height=250):
-                        ori_normal_plot = gr.Plot(self.normal_curve(df=df, cote='ori'))
+                        ori_normal_plot = gr.Plot(
+                            self.normal_curve(
+                                df=df, cote='ori'
+                            )
+                        )
                     with gr.Row(height=150):
-                        ori_cp_gauge = gr.Plot(self.gauge(df=df, type='cp', cote='ori'))
-                        ori_cpk_gauge = gr.Plot(self.gauge(df=df, type='cpk', cote='ori'))
+                        ori_cp_gauge = gr.Plot(
+                            self.gauge(
+                                df=df, type='cp', cote='ori'
+                            )
+                        )
+                        ori_cpk_gauge = gr.Plot(
+                            self.gauge(
+                                df=df, type='cpk', cote='ori'
+                            )
+                        )
             with gr.Column(scale=2):
                 gr.Markdown("### `Control card`")
                 with gr.Row(height=400):
-                    control_plot = gr.Plot(self.control_graph(df=df))
-
+                    control_plot = gr.Plot(
+                        self.control_graph(
+                            df=df
+                        )
+                    )
             self.plots = [
                 pos_normal_plot, pos_cp_gauge, pos_cpk_gauge,
                 ori_normal_plot, ori_cp_gauge, ori_cpk_gauge,
                 control_plot
             ]
             return self.plots
+
+    def refresh(self, df):
+        return [
+            self.normal_curve(df, cote='pos'),
+            self.gauge(df, type='cp', cote='pos'),
+            self.gauge(df, type='cpk', cote='pos'),
+            self.normal_curve(df, cote='ori'),
+            self.gauge(df, type='cp', cote='ori'),
+            self.gauge(df, type='cpk', cote='ori'),
+            self.control_graph(df),
+        ]
