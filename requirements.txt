@@ -2,3 +2,4 @@ huggingface_hub
 gradio==5.33.0
 numpy
 pandas
+scipy
