@@ -1,8 +1,6 @@
 import pandas as pd
-import json
-import os
 
-def machine_metrics(raw_data):
+async def machine_metrics(raw_data):
     """
     Calculate machine efficiency metrics from raw production data.
     :param raw_data: collection of raw production data containing timestamps, downtime, and compliance information.
@@ -64,7 +62,7 @@ def machine_metrics(raw_data):
         "MTTR": str(mttr)
     }
 
-def fetch_issues(raw_data):
+async def fetch_issues(raw_data):
     df = pd.DataFrame(raw_data)
     issues = df[df["Event"] == "Machine Error"]
     return issues[["Timestamp", "Event", "Error Code", "Error Description", "Downtime Start", "Downtime End"]]

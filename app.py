@@ -15,7 +15,7 @@ STATE = {
     "current_time": None,
     "part_id": None,
     "data": {},
-    "machine": {},
+    "efficiency": {},
 }
 
 with gr.Blocks(theme=custom_theme) as demo:

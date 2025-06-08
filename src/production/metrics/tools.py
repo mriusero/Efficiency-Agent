@@ -1,5 +1,5 @@
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 def stats_metrics(data, column, usl, lsl):
     """
@@ -21,7 +21,7 @@ def stats_metrics(data, column, usl, lsl):
     return rolling_mean, rolling_std, cp, cpk
 
 
-def process_unique_tool(tool, raw_data):
+async def process_unique_tool(tool, raw_data):
     """
     Process data for a single tool and save the results to a CSV file.
     Args:
@@ -35,17 +35,18 @@ def process_unique_tool(tool, raw_data):
     return tool, tool_data
 
 
-def tools_metrics(raw_data):
+async def tools_metrics(raw_data):
     """
     Process the raw production data to extract tool metrics in parallel.
     """
     metrics = {}
     tools = raw_data['Tool ID'].unique()
 
-    with ThreadPoolExecutor() as executor:
-        results = list(executor.map(lambda tool: process_unique_tool(tool, raw_data), tools))
-        for tool, tool_data in results:
-            metrics[f"tool_{tool}"] = tool_data
+    tasks = [process_unique_tool(tool, raw_data) for tool in tools]
+    results = await asyncio.gather(*tasks)
+
+    for tool, tool_data in results:
+        metrics[f"tool_{tool}"] = tool_data
 
     # Calculate metrics for all tools together
     all_tools_data = raw_data.copy()

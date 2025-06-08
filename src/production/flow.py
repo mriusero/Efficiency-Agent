@@ -1,12 +1,12 @@
-import time
 import random
 import numpy as np
 import pandas as pd
+import asyncio
 from datetime import datetime, timedelta
 
 from .downtime import machine_errors
 
-def generate_data(state):
+async def generate_data(state):
     """
     Generate synthetic production data for a manufacturing process.
     """
@@ -83,7 +83,7 @@ def generate_data(state):
 
             print(f"     - part {part_id} data generated")
             part_id += 1
-            time.sleep(0.5)
+            await asyncio.sleep(0.5)
 
         current_time += timedelta(seconds=1)
 

@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.stats import norm
-import pandas as pd
 import plotly.graph_objects as go
 import gradio as gr
 
@@ -10,6 +9,7 @@ class ToolMetricsDisplay:
         self.df = None
         self.pos_color = '#2CFCFF'
         self.ori_color = '#ff8508'
+        self.plots = []
 
     @staticmethod
     def gauge(df, type=None, cote=None):
@@ -120,8 +120,12 @@ class ToolMetricsDisplay:
 
         if cote == 'pos':
             color = self.pos_color
+            lsl = 0.3
+            usl = 0.5
         else:
             color = self.ori_color
+            lsl = 0.2
+            usl = 0.6
         mu_column = f"{cote}_rolling_mean"
         std_column = f"{cote}_rolling_std"
         idx = df['Timestamp'].idxmax()
@@ -130,9 +134,9 @@ class ToolMetricsDisplay:
         y = norm.pdf(x, mu, std)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Normal Curve', line=dict(color=color)))
-        fig.add_shape(type="line", x0=0.6, y0=0, x1=0.6, y1=max(y), line=dict(color="red", width=1, dash="dot"),
+        fig.add_shape(type="line", x0=usl, y0=0, x1=usl, y1=max(y), line=dict(color="red", width=1, dash="dot"),
                       name='usl')
-        fig.add_shape(type="line", x0=0.2, y0=0, x1=0.2, y1=max(y), line=dict(color="red", width=1, dash="dot"),
+        fig.add_shape(type="line", x0=lsl, y0=0, x1=lsl, y1=max(y), line=dict(color="red", width=1, dash="dot"),
                       name='lsl')
         fig.update_layout(
             template='plotly_dark',
@@ -175,5 +179,9 @@ class ToolMetricsDisplay:
                 with gr.Row(height=400):
                     control_plot = gr.Plot(self.control_graph(df=df))
 
-            return [pos_normal_plot, pos_cp_gauge, pos_cpk_gauge, ori_normal_plot, ori_cp_gauge, ori_cpk_gauge,
-                    control_plot]
+            self.plots = [
+                pos_normal_plot, pos_cp_gauge, pos_cpk_gauge,
+                ori_normal_plot, ori_cp_gauge, ori_cpk_gauge,
+                control_plot
+            ]
+            return self.plots
