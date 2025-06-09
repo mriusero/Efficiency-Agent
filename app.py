@@ -1,4 +1,5 @@
 import gradio as gr
+from datetime import datetime
 
 from src.ui import sidebar_ui, dashboard_ui
 from src.ui.session import session_state
@@ -12,10 +13,10 @@ custom_theme = gr.themes.Base(
 
 STATE = {
     "running": False,
-    "current_time": None,
-    "part_id": None,
+    "date": datetime.now(),
+    "part_id": 0,
+    "status": {},
     "data": {},
-    "efficiency": {},
 }
 
 with gr.Blocks(theme=custom_theme) as demo:

@@ -209,7 +209,7 @@ class GeneralMetricsDisplay:
         )
         return fig
 
-    def general_block(self, all_tools_df, issues_df, efficiency_data):
+    def general_block(self, all_tools_df, issues_df, status):
         header = f"Metrics Summary"
         html_content = f"""
         <div style="display: flex; align-items: center; justify-content: flex-start; width: 100%;">
@@ -225,24 +225,24 @@ class GeneralMetricsDisplay:
                     total_count = gr.Plot(
                         self.kpi_value(
                             value=self.get_max_part_id(all_tools_df),
-                            title="Total Count"
+                            title="Total Count (parts)"
                         )
                     )
                     total_time = gr.Plot(
                         self.kpi_value(
-                            value=efficiency_data.get("opening_time", "0 days 00:00:00"),
+                            value=status.get("opening_time", "0 days 00:00:00"),
                             title="Total Time"
                         )
                     )
                     mtbf_plot = gr.Plot(
                         self.kpi_value(
-                            value=efficiency_data.get("MTBF", "0 days 00:00:00"),
+                            value=status.get("MTBF", "0 days 00:00:00"),
                             title="MTBF"
                         )
                     )
                     mttr_plot = gr.Plot(
                         self.kpi_value(
-                            value=efficiency_data.get("MTTR", "0 days 00:00:00"),
+                            value=status.get("MTTR", "0 days 00:00:00"),
                             title="MTTR"
                         )
                     )
@@ -252,21 +252,21 @@ class GeneralMetricsDisplay:
                     with gr.Row(height=150):
                         oee_plot = gr.Plot(
                             self.kpi_rate(
-                                percentage=efficiency_data.get('OEE', 0),
+                                percentage=status.get('OEE', 0),
                                 title="OEE"
                             )
                         )
                     with gr.Row(height=150):
                         quality_rate_plot = gr.Plot(
                             self.kpi_rate(
-                                percentage=efficiency_data.get("quality_rate", 0),
+                                percentage=status.get("quality_rate", 0),
                                 title="Quality Rate"
                             )
                         )
                     with gr.Row(height=150):
                         availability_plot = gr.Plot(
                             self.kpi_rate(
-                                percentage=efficiency_data.get("availability_rate", 0),
+                                percentage=status.get("availability_rate", 0),
                                 title="Availability"
                             )
                         )
@@ -284,14 +284,14 @@ class GeneralMetricsDisplay:
         ]
         return self.plots
 
-    def refresh(self, all_tools_df, issues_df, efficiency_data):
+    def refresh(self, all_tools_df, issues_df, status):
         return [
-            self.kpi_value(value=self.get_max_part_id(all_tools_df), title="Total Count"),
-            self.kpi_value(value=efficiency_data.get("opening_time", "0 days 00:00:00"), title="Total Time"),
-            self.kpi_rate(percentage=efficiency_data.get('OEE', 0), title="OEE"),
-            self.kpi_rate(percentage=efficiency_data.get("quality_rate", 0), title="Quality Rate"),
-            self.kpi_rate(percentage=efficiency_data.get("availability_rate", 0), title="Availability"),
-            self.kpi_value(value=efficiency_data.get("MTBF", "0 days 00:00:00"), title="MTBF"),
-            self.kpi_value(value=efficiency_data.get("MTTR", "0 days 00:00:00"), title="MTTR"),
+            self.kpi_value(value=self.get_max_part_id(all_tools_df), title="Total Count (parts)"),
+            self.kpi_value(value=status.get("opening_time", "0 days 00:00:00"), title="Total Time"),
+            self.kpi_rate(percentage=status.get('OEE', 0), title="OEE"),
+            self.kpi_rate(percentage=status.get("quality_rate", 0), title="Quality Rate"),
+            self.kpi_rate(percentage=status.get("availability_rate", 0), title="Availability"),
+            self.kpi_value(value=status.get("MTBF", "0 days 00:00:00"), title="MTBF"),
+            self.kpi_value(value=status.get("MTTR", "0 days 00:00:00"), title="MTTR"),
             self.pareto(issues_df, error_col='Error Code')
         ]

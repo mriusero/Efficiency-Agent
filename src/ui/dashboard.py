@@ -31,7 +31,7 @@ async def dataflow(state):
         state['data']['tools'].setdefault(f'tool_{i}', pd.DataFrame())
 
     state['data'].setdefault('issues', {})
-    state.setdefault('efficiency', {})
+    state.setdefault('status', {})
 
     # Check running state
     if state.get('running'):
@@ -64,7 +64,7 @@ async def dataflow(state):
         ] + [
             pd.DataFrame(state['data']['issues'])
         ] + [
-            state['efficiency']
+            state['status']
         ]
     state['last_hash'] = current_hash
 
@@ -74,12 +74,38 @@ async def dataflow(state):
     for tool, df in tools_data.items():
         state['data']['tools'][tool] = df
 
+    # Get machine metrics
     machine_data = await machine_metrics(raw_data)
-    state['efficiency'] = machine_data
+    state['status'] = machine_data
 
+    # Get tools stats
+    for tool in ['tool_1', 'tool_2', 'all']:
+        df = state['data']['tools'].get(tool, pd.DataFrame())
+        if df.empty or 'Timestamp' not in df.columns:
+            continue
+
+        df = df.copy()
+        df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
+        df.dropna(subset=['Timestamp'], inplace=True)
+
+        if df.empty:
+            continue
+
+        idx = df['Timestamp'].idxmax()
+
+        for cote in ['pos', 'ori']:
+            for metric_type in ['cp', 'cpk']:
+                column = f"{cote}_rolling_{metric_type}"
+                if column in df.columns:
+                    value = df.at[idx, column]
+                    key = f"{tool}_{metric_type}_{cote}"
+                    state['status'][key] = round(value, 4)
+
+    # Get issues
     issues = await fetch_issues(raw_data)
     state['data']['issues'] = issues
 
+    # Update situation
     return (
         [
             pd.DataFrame(state['data']['tools'].get(f'tool_{i}', pd.DataFrame()))
@@ -89,7 +115,7 @@ async def dataflow(state):
         ] + [
             pd.DataFrame(state['data']['issues'])
         ] + [
-            state['efficiency']
+            state['status']
         ]
     )
 
@@ -108,20 +134,18 @@ def init_components(n=TOOLS_COUNT):
     tool_plots = []
     general_plots = []
 
-    # Tool metrics displays and their plots
-    for i in range(1, n + 1):
+    for i in range(1, n + 1):                   # Tool metrics displays
         display = ToolMetricsDisplay()
         displays.append(display)
         tool_plots.extend(display.tool_block(df=pd.DataFrame(), id=i))
 
-    # General metrics display and its plots
-    main_display = GeneralMetricsDisplay()
+    main_display = GeneralMetricsDisplay()      # General metrics display
     displays.append(main_display)
     general_plots.extend(
             main_display.general_block(
             all_tools_df=pd.DataFrame(),
             issues_df=pd.DataFrame(),
-            efficiency_data={}
+            status={}
         )
     )
     return displays, tool_plots, general_plots
@@ -141,18 +165,16 @@ async def on_tick(state, displays):
         tool_dfs = data[:-3]             # all individual tool DataFrames
         all_tools_df = data[-3]          # 'all' tools DataFrame
         issues_df = data[-2]             # issues DataFrame
-        efficiency_data = data[-1]       # efficiency dict
+        status = data[-1]                # status dict
 
-        # General plots
-        general_display = displays[-1]
+        general_display = displays[-1]                      # General plots
         general_plots = general_display.refresh(
             all_tools_df=all_tools_df,
             issues_df=issues_df,
-            efficiency_data=efficiency_data
+            status=status
         )
 
-        # Tool-specific plots
-        tool_plots = []
+        tool_plots = []                                     # Tool-specific plots
         for df, display in zip(tool_dfs, displays[:-1]):
             tool_plots.extend(display.refresh(df=df))
 

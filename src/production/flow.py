@@ -13,7 +13,7 @@ async def generate_data(state):
     """
     Generate synthetic production data for a manufacturing process.
     """
-    current_time = state["current_time"] if state["current_time"] else datetime.now()
+    current_time = state["date"] if state["date"] else datetime.now()
     part_id = state["part_id"] if state["part_id"] else 0
 
     non_compliance_rates = {
@@ -95,5 +95,5 @@ async def generate_data(state):
 
         current_time += timedelta(seconds=1)
 
-    state["current_time"] = current_time
+    state["date"] = current_time
     state["part_id"] = part_id

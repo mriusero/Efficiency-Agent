@@ -35,6 +35,14 @@ async def machine_metrics(raw_data):
     mtbf = operating_time / downtime_count if downtime_count > 0 else pd.Timedelta(0)
     mttr = unplanned_stop_time / downtime_count if downtime_count > 0 else pd.Timedelta(0)
 
+    # Quality rate per tool ID
+    quality_by_tool = {}
+    for tool_id in [1, 2]:
+        tool_df = df[df["Tool ID"] == tool_id]
+        total = len(tool_df)
+        ok_count = (tool_df["Compliance"] == "OK").sum()
+        quality_by_tool[f"quality_rate_tool_{tool_id}"] = round(((ok_count / total) * 100), 2) if total > 0 else 0
+
     return {
         "opening_time": str(opening_time),
         "required_time": str(required_time),
@@ -42,10 +50,11 @@ async def machine_metrics(raw_data):
         "operating_time": str(operating_time),
         "net_time": str(net_time),
         "useful_time": str(useful_time),
-        "quality_rate": quality_rate,
-        "operating_rate": operating_rate,
-        "availability_rate": availability_rate,
-        "OEE": OEE,
+        "quality_rate": round(quality_rate, 2),
+        **quality_by_tool,
+        "operating_rate": round(operating_rate, 2),
+        "availability_rate": round(availability_rate, 2),
+        "OEE": round(OEE, 2),
         "MTBF": str(mtbf),
         "MTTR": str(mttr)
     }
