@@ -142,7 +142,7 @@ class GeneralMetricsDisplay:
             fig.update_layout(
                 template='plotly_dark',
                 annotations=[dict(
-                    text="No data",
+                    text="No Error",
                     showarrow=False,
                     font=dict(size=16, color="white")
                 )]

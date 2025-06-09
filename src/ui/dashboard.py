@@ -108,6 +108,12 @@ def init_components(n=TOOLS_COUNT):
     tool_plots = []
     general_plots = []
 
+    # Tool metrics displays and their plots
+    for i in range(1, n + 1):
+        display = ToolMetricsDisplay()
+        displays.append(display)
+        tool_plots.extend(display.tool_block(df=pd.DataFrame(), id=i))
+
     # General metrics display and its plots
     main_display = GeneralMetricsDisplay()
     displays.append(main_display)
@@ -118,12 +124,6 @@ def init_components(n=TOOLS_COUNT):
             efficiency_data={}
         )
     )
-    # Tool metrics displays and their plots
-    for i in range(1, n + 1):
-        display = ToolMetricsDisplay()
-        displays.append(display)
-        tool_plots.extend(display.tool_block(df=pd.DataFrame(), id=i))
-
     return displays, tool_plots, general_plots
 
 
@@ -143,25 +143,19 @@ async def on_tick(state, displays):
         issues_df = data[-2]             # issues DataFrame
         efficiency_data = data[-1]       # efficiency dict
 
-        # Update general plots
-        general_plots = []
-        general_display = displays[0]
-        general_plots.extend(
-            general_display.refresh(
-                all_tools_df=all_tools_df,
-                issues_df=issues_df,
-                efficiency_data=efficiency_data
-            )
+        # General plots
+        general_display = displays[-1]
+        general_plots = general_display.refresh(
+            all_tools_df=all_tools_df,
+            issues_df=issues_df,
+            efficiency_data=efficiency_data
         )
 
-        # Update tool-specific plots
+        # Tool-specific plots
         tool_plots = []
-        for df, display in zip(tool_dfs, displays[1:]):
-            tool_plots.extend(
-                display.refresh(
-                    df=df
-                )
-            )
+        for df, display in zip(tool_dfs, displays[:-1]):
+            tool_plots.extend(display.refresh(df=df))
+
         return tool_plots + general_plots + [state]
 
 def dashboard_ui(state):
