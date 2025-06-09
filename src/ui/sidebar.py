@@ -1,6 +1,10 @@
 import gradio as gr
 
-from src.chat import respond
+from src.agent.inference import MistralAgent
+
+def respond(gr_message, history=None):
+    agent = MistralAgent()
+    yield agent.run(gr_message)
 
 
 def sidebar_ui(state, width=700, visible=True):
@@ -18,11 +22,49 @@ def sidebar_ui(state, width=700, visible=True):
             2. **Ask Questions** - Interact with the chatbot to get insights on production processes.
             3. **Ask for Help** - Get assistance with any issues or queries related to production.
 
-            Note: you can click on `stop` or `reset` to control the production simulation.
+            Note: you can click on `Pause` or `Reset` to control the production simulation.
             """
         )
-        gr.HTML("<div style='margin-bottom: 40px;'></div>")
-        chatbot = gr.ChatInterface(respond, type='messages')
+
+        with gr.Blocks():
+            with gr.Row(height=800):
+                with gr.Tabs():
+                    with gr.TabItem("Agent"):
+                        chatbot = gr.ChatInterface(
+                            fn=respond,
+                            type="messages",
+                            multimodal=False,
+                            chatbot=gr.Chatbot(
+                                placeholder="⚡️ How can I help you today ?",
+                                type="messages",
+                                height=600,
+                                show_copy_button=True,
+                            ),
+                            show_progress='full',
+                            stop_btn=True,
+                            save_history=True,
+                            examples=[
+                                ["How is the production process going?"],
+                                ["What are the common issues faced in production?"],
+                               # ["What is the status of the current production line?"],
+                               # ["Can you provide insights on equipment performance?"],
+                               # ["How can I optimize the workflow in the production area?"],
+                               # ["How do I troubleshoot a specific piece of equipment?"],
+                               # ["What are the best practices for maintaining production efficiency?"]
+                            ],
+                            cache_examples=False  # désactive le cache si les réponses varient
+                        )
+                    with gr.TabItem("Documentation", visible=True):
+                        md_output = gr.Markdown("📄 La documentation s'affichera ici.")
+
+            #textbox=gr.MultimodalTextbox(file_types=[".png", ".pdf"], sources=["upload", "microphone"]),
+            #additional_inputs=[gr.Textbox("Système", label="System prompt"), gr.Slider(0, 1)],
+            #additional_inputs_accordion="Options avancées",
+            #flagging_mode="manual",
+            #flagging_options=["👍", "👎"],
+            #title="Mon Chatbot",
+            #description="Testez un modèle multimodal",
+
         sessions_state = gr.JSON(
             label="Sessions State",
             visible=True,

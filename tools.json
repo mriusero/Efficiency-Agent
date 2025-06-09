@@ -1,0 +1,21 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "calculate_sum",
+            "description": "Calculates the sum of a list of numbers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "numbers": {
+                        "type": "array",
+                        "description": "A list of numbers to be summed from the question."
+                    }
+                },
+                "required": [
+                    "numbers"
+                ]
+            }
+        }
+    }
+]

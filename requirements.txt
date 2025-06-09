@@ -1,6 +1,11 @@
 huggingface_hub
 gradio==5.33.0
+gradio[mcp]
+requests
+pydantic
 numpy
 pandas
 scipy
 plotly
+dotenv
+mistralai
