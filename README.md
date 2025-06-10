@@ -1,7 +1,7 @@
 ---
 title: Efficiency Agent
 emoji: ⚡️
-colorFrom: purple
+colorFrom: indigo
 colorTo: blue
 sdk: gradio
 sdk_version: 5.33.0
