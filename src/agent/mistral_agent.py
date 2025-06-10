@@ -7,6 +7,7 @@ from src.agent.tools import (
     calculate_sum,
     retrieve_knowledge,
     visit_webpage,
+    get_production_status,
 )
 
 load_dotenv()
@@ -22,6 +23,7 @@ class MistralAgent:
             "calculate_sum": calculate_sum,
             "retrieve_knowledge": retrieve_knowledge,
             "visit_webpage": visit_webpage,
+            "get_production_status": get_production_status,
         }
         self.tools = self.get_tools()
 
@@ -33,5 +35,6 @@ class MistralAgent:
                 calculate_sum,
                 retrieve_knowledge,
                 visit_webpage,
+                get_production_status,
             ]
         ).get('tools')

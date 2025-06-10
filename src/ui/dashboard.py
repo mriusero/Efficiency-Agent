@@ -1,5 +1,6 @@
 import asyncio
 from functools import partial
+import json
 
 import gradio as gr
 import pandas as pd
@@ -16,7 +17,6 @@ TOOLS_COUNT = 2
 def hash_dataframe(df):
     """Computes a simple hash to detect changes in the DataFrame."""
     return pd.util.hash_pandas_object(df).sum()
-
 
 async def dataflow(state):
     """
@@ -177,6 +177,9 @@ async def on_tick(state, displays):
         tool_plots = []                                     # Tool-specific plots
         for df, display in zip(tool_dfs, displays[:-1]):
             tool_plots.extend(display.refresh(df=df))
+
+        with open("data/status.json", "w") as f:
+            json.dump(state["status"], f, indent=4)
 
         return tool_plots + general_plots + [state]
 

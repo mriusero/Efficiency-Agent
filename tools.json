@@ -59,5 +59,17 @@
                 ]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_production_status",
+            "description": "This tool retrieves the current production status including various metrics such as operating time, unplanned stops, quality rates, availability, and performance indicators.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
     }
 ]

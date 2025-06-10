@@ -2,7 +2,6 @@ import gradio as gr
 
 from src.agent.stream import respond
 
-
 def sidebar_ui(state, width=700, visible=True):
     with gr.Sidebar(width=width, visible=visible):
         gr.Markdown("# Ask Agent")
@@ -40,29 +39,17 @@ def sidebar_ui(state, width=700, visible=True):
                             stop_btn=True,
                             save_history=True,
                             examples=[
-                                ["What is the sum of 1+1 ?"],
+                              #  ["What is the sum of 1+1 ?"],
                                 ["How is the production process going?"],
                                 ["What are the common issues faced in production?"],
-                               # ["What is the status of the current production line?"],
+                                ["Can you explain me Cp & Cpk KPIs ?"],
                                # ["Can you provide insights on equipment performance?"],
                                # ["How can I optimize the workflow in the production area?"],
                                # ["How do I troubleshoot a specific piece of equipment?"],
                                # ["What are the best practices for maintaining production efficiency?"]
                             ],
-                        #    additional_inputs=[state],
-                            cache_examples=False  # désactive le cache si les réponses varient
+                            cache_examples=False
                         )
-                    #with gr.TabItem("Documentation", visible=True):
-                    #    md_output = gr.Markdown("📄 La documentation s'affichera ici.")
-
-            #textbox=gr.MultimodalTextbox(file_types=[".png", ".pdf"], sources=["upload", "microphone"]),
-            #additional_inputs=[gr.Textbox("Système", label="System prompt"), gr.Slider(0, 1)],
-            #additional_inputs_accordion="Options avancées",
-            #flagging_mode="manual",
-            #flagging_options=["👍", "👎"],
-            #title="Mon Chatbot",
-            #description="Testez un modèle multimodal",
-
         sessions_state = gr.JSON(
             label="Sessions State",
             visible=True,
