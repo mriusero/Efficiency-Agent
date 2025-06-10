@@ -1,10 +1,84 @@
 import gradio as gr
+import json
+from gradio import ChatMessage
 
 from src.agent.inference import MistralAgent
 
-def respond(gr_message, history=None):
-    agent = MistralAgent()
-    yield agent.run(gr_message)
+agent = MistralAgent()
+
+async def respond(message, history=None):
+
+    if history is None:
+        history = []
+    history.append(ChatMessage(role="user", content=message))
+
+    thinking_msg = ChatMessage(
+        role="assistant",
+        content="",
+        metadata={"title": "Thinking", "status": "pending"}
+    )
+    history.append(thinking_msg)
+    yield history
+
+    with open("./prompt.md", encoding="utf-8") as f:
+        prompt = f.read()
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": message},
+        #{
+        #    "role": "assistant",
+        #    "content": "THINKING:\nLet's tackle this problem",
+        ##    "prefix": True
+        #},
+    ]
+    payload = {
+        "agent_id": agent.agent_id,
+        "messages": messages,
+        "stream": True,
+        "max_tokens": None,
+        "tools": agent.tools,
+        "tool_choice": "auto",
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "n": 1
+    }
+
+    response = await agent.client.agents.stream_async(**payload)
+
+    full = ""
+    thinking = ""
+    final = ""
+
+    async for chunk in response:
+        delta = chunk.data.choices[0].delta
+        content = delta.content or ""
+        full += content
+
+        if "FINAL ANSWER:" in full:
+            parts = full.split("FINAL ANSWER:", 1)
+            thinking = parts[0].replace("THINKING:", "").strip()
+            final = parts[1].strip()
+        else:
+            thinking = full.strip()
+            final = ""
+
+        history[-1] = ChatMessage(
+            role="assistant",
+            content=thinking,
+            metadata={"title": "Thinking", "status": "pending"}
+        )
+        yield history
+
+    history[-1] = ChatMessage(
+        role="assistant",
+        content=thinking,
+        metadata={"title": "Thinking", "status": "done"}
+    )
+
+    history.append(ChatMessage(role="assistant", content=final))
+    yield history
+
 
 
 def sidebar_ui(state, width=700, visible=True):
