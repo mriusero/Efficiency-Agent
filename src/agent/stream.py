@@ -32,7 +32,8 @@ async def respond(message, history=None):
     if history is None:
         history = []
 
-    history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending"}))
+    if not history or history[-1].role != "assistant" or history[-1].metadata.get("status") == "done":
+        history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending"}))
     yield history
 
     messages = [
@@ -131,7 +132,7 @@ async def respond(message, history=None):
                     messages = call_tool(
                         agent,
                         tool_calls,
-                        messages
+                        messages,
                     )
                     last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
                     if last_tool_response and last_tool_response.get("content"):
