@@ -9,3 +9,14 @@ scipy
 plotly
 dotenv
 mistralai
+fastapi
+uvicorn
+pydantic
+aiohttp
+markdown
+lxml[html_clean]
+readability-lxml
+chromadb
+markdownify
+html2markdown
+smolagents

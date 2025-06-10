@@ -17,5 +17,47 @@
                 ]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "retrieve_knowledge",
+            "description": "Retrieves knowledge from a database with a provided query.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The query to search for in the vector store."
+                    },
+                    "n_results": {
+                        "type": "integer",
+                        "description": "The number of results to return. Default is 1."
+                    }
+                },
+                "required": [
+                    "query"
+                ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "visit_webpage",
+            "description": "Visits a webpage at the given URL and reads its content as a markdown string.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the webpage to visit."
+                    }
+                },
+                "required": [
+                    "url"
+                ]
+            }
+        }
     }
 ]
