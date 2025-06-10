@@ -1,125 +1,158 @@
 from gradio import ChatMessage
+import json
+import asyncio
+import re
 
 from src.agent.mistral_agent import MistralAgent
 
+from src.agent.utils.call import call_tool
+
+
 agent = MistralAgent()
+api_lock = asyncio.Lock()
+tool_lock = asyncio.Lock()
 
 with open("./prompt.md", encoding="utf-8") as f:
     SYSTEM_PROMPT = f.read()
 
+def extract_phases(text):
+    """Découpe le contenu en THINK / ACT / OBSERVE / FINAL ANSWER"""
+    phases = {'think': '', 'act': '', 'observe': '', 'final': ''}
+    matches = list(re.finditer(r'(THINK:|ACT:|OBSERVE:|FINAL ANSWER:)', text))
+
+    for i, match in enumerate(matches):
+        phase = match.group(1).lower().replace(":", "").replace("final answer", "final")
+        start = match.end()
+        end = matches[i+1].start() if i + 1 < len(matches) else len(text)
+        phases[phase] = text[start:end].strip()
+
+    return phases
+
 async def respond(message, history=None):
-    """
-    Respond to a user message using the Mistral agent.
-    """
     if history is None:
         history = []
 
-    history.append(ChatMessage(role="user", content=message))
-    history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking", "status": "pending"}))
+    history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending"}))
     yield history
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": message},
-        {
-            "role": "assistant",
-            "content": "THINKING: Let's tackle this problem, ",
-            "prefix": True,
-        },
+        {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True},
     ]
-    payload = {
-        "agent_id": agent.agent_id,
-        "messages": messages,
-        "stream": True,
-        "max_tokens": None,
-        "tools": agent.tools,
-        "tool_choice": "auto",
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
-        "n": 1
-    }
-    response = await agent.client.agents.stream_async(**payload)
 
-    full = ""
-    thinking = ""
-    tooling = ""
-    final = ""
+    phase_order = ["think", "act", "observe", "final"]
+    current_phase_index = 0
+    done = False
 
-    current_phase = None  # None | "thinking" | "tooling" | "final"
+    final_full = ""
+    while not done:
+        current_phase = phase_order[current_phase_index]
+        if current_phase != "final":
+            full = ""
+        else:
+            full = final_full
 
-    history[-1] = ChatMessage(role="assistant", content="", metadata={"title": "Thinking", "status": "pending"})
+        print('\n', '---' * 15)
+        print(f">>> messages before payload [phase {current_phase_index}] :", json.dumps([m for m in messages if m.get("role") != "system"], indent=2))
+        payload = {
+            "agent_id": agent.agent_id,
+            "messages": messages,
+            "stream": True,
+            "max_tokens": None,
+            "tools": agent.tools,
+            "tool_choice": "auto",
+            "presence_penalty": 0,
+            "frequency_penalty": 0,
+            "n": 1
+        }
 
-    async for chunk in response:
-        delta = chunk.data.choices[0].delta
-        content = delta.content or ""
-        full += content
+        async with api_lock:
+            response = await agent.client.agents.stream_async(**payload)
 
-            # Phase finale
-        if "FINAL ANSWER:" in full:
+            async for chunk in response:
+                delta = chunk.data.choices[0].delta
+                content = delta.content or ""
+                full += content
+                if current_phase == "final":
+                    final_full = full
 
-            parts = full.split("FINAL ANSWER:", 1)
-            before_final = parts[0]
-            final = parts[1].strip()
-
-            if "TOOLING:" in before_final:
-                tooling = before_final.split("TOOLING:", 1)[1].strip()
-            else:
-                tooling = ""
-
-            if current_phase != "final":
-                if current_phase == "tooling":
-                    history[-1] = ChatMessage(role="assistant", content=tooling, metadata={"title": "Tooling", "status": "done"})
-                elif current_phase == "thinking":
-                    history[-1] = ChatMessage(role="assistant", content=thinking, metadata={"title": "Thinking", "status": "done"})
-
-                history.append(ChatMessage(role="assistant", content=final))
-                current_phase = "final"
+                phases = extract_phases(full)
+                buffer = phases.get(current_phase, "")
+                if current_phase == "think":
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending"})
+                elif current_phase == "act":
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending"})
+                elif current_phase == "observe":
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending"})
                 yield history
 
-        # Phase outil
-        elif "TOOLING:" in full:
+                if current_phase == "final":
+                    delta_content = delta.content or ""
+                    final_full += delta_content
+                    phases = extract_phases(final_full)
+                    buffer = phases.get("final", "")
+                    yield history
+                    if delta_content == "" and buffer:
+                        done = True
+                        break
 
-            parts = full.split("TOOLING:", 1)
-            before_tooling = parts[0]
-            tooling = ""
+        if current_phase_index == 0:
+            messages = [msg for msg in messages if not msg.get("prefix")]
+            if buffer:
+                prefix_label = current_phase.upper() if current_phase != "final" else "FINAL ANSWER"
+                messages.append({
+                    "role": "assistant",
+                    "content": f"{prefix_label}: {buffer}\n\nACT: Let's using some tools to solve the problem.",
+                    "prefix": True
+                })
 
-            if "THINKING:" in before_tooling:
-                thinking = before_tooling.split("THINKING:", 1)[1].strip()
+        elif current_phase_index == 1:
+            for message in messages:
+                if "prefix" in message:
+                    del message["prefix"]
+
+        if current_phase_index == 2:
+            for message in messages:
+                if "prefix" in message:
+                    del message["prefix"]
+            messages.append({
+                "role": "assistant",
+                "content": "OBSERVE: Based on the results, let's observe the situation and see if we need to adjust our approach.",
+                "prefix": True
+            })
+
+        yield history
+
+        if current_phase == "act":
+            tool_calls = getattr(delta, "tool_calls", None)
+            if tool_calls and tool_calls != [] and str(tool_calls) != "Unset()":
+                async with tool_lock:
+                    messages = call_tool(
+                        agent,
+                        tool_calls,
+                        messages
+                    )
+                    last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
+                    if last_tool_response and last_tool_response.get("content"):
+                        buffer += "\n\n" + last_tool_response["content"]
+                        history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending"})
+                yield history
+
+        if not done:
+            current_phase_index += 1
+            if current_phase_index < len(phase_order):
+                pass
             else:
-                thinking = before_tooling.strip()
+                done = True
 
-            tooling = parts[1].strip()
+    observe_text = phases.get("observe", "")
+    final_text = phases.get("final", "")
 
-            if current_phase != "tooling":
-                if current_phase == "thinking":
-                    history[-1] = ChatMessage(role="assistant", content=thinking,
-                                              metadata={"title": "Thinking", "status": "done"})
-                history.append(
-                    ChatMessage(role="assistant", content=tooling, metadata={"title": "Tooling", "status": "pending"}))
-                current_phase = "tooling"
-            else:
-                history[-1] = ChatMessage(role="assistant", content=tooling,
-                                          metadata={"title": "Tooling", "status": "pending"})
-            yield history
+    if observe_text:
+        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Observing...", "status": "done"})
 
-        # Phase réflexion
-        elif "THINKING:" in full or current_phase is None:
-
-            if "THINKING:" in full:
-                thinking = full.split("THINKING:", 1)[1].strip()
-            else:
-                thinking = full.strip()
-
-            if current_phase != "thinking":
-                history[-1] = ChatMessage(role="assistant", content=thinking, metadata={"title": "Thinking", "status": "pending"})
-                current_phase = "thinking"
-            else:
-                history[-1] = ChatMessage(role="assistant", content=thinking, metadata={"title": "Thinking", "status": "pending"})
-            yield history
-
-    if current_phase == "thinking":
-        history[-1] = ChatMessage(role="assistant", content=thinking, metadata={"title": "Thinking", "status": "done"})
-    elif current_phase == "tooling":
-        history[-1] = ChatMessage(role="assistant", content=tooling, metadata={"title": "Tooling", "status": "done"})
+    if final_text:
+        history.append(ChatMessage(role="assistant", content=final_text))
 
     yield history
