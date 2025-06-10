@@ -22,11 +22,11 @@ STATE = {
 with gr.Blocks(theme=custom_theme) as demo:
 
         # HEADER
-        gr.Markdown("# AI Industrial Efficiency Helper ⚡️")
-        gr.Markdown("### *AI for efficiency in Industries & Services*")
+        gr.Markdown("# Efficiency Agent ⚡️️")
+        gr.Markdown("### *Smarter Efficiency. Across Industries & Services !*")
         gr.Markdown(
             """
-            This demo showcases the capabilities of IndustryMind AI.
+            This demo showcases the capabilities of an AI-Agent designed to assist in production processes.  
             You can interact with the chatbot to get insights and assistance on production-related queries.
             """
         )

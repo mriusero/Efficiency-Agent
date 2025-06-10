@@ -7,15 +7,14 @@ def sidebar_ui(state, width=700, visible=True):
         gr.Markdown("# Ask Agent")
         gr.Markdown(
             """
-            Ask questions about production processes, equipment, and workflows.
+            Ask questions about production quality, efficiency, or issues.  
             The chatbot will provide insights and assistance based on the current production data.
             """
         )
         gr.Markdown(
             """
             1. **Play** - Start the production simulation and generate synthetic data.
-            2. **Ask Questions** - Interact with the chatbot to get insights on production processes.
-            3. **Ask for Help** - Get assistance with any issues or queries related to production.
+            2. **Ask Agent** - Interact with the chatbot to get insights on production process, any issues and more.
 
             Note: you can click on `Pause` or `Reset` to control the production simulation.
             """
@@ -52,7 +51,7 @@ def sidebar_ui(state, width=700, visible=True):
                         )
         sessions_state = gr.JSON(
             label="Sessions State",
-            visible=True,
+            visible=False,
             value=state.value,
         )
         state.change(

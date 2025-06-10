@@ -1,5 +1,5 @@
 ---
-title: AI Industrial Efficiency Helper
+title: Efficiency Agent
 emoji: ⚡️
 colorFrom: blue
 colorTo: green
@@ -8,7 +8,11 @@ sdk_version: 5.33.0
 app_file: app.py
 pinned: false
 license: apache-2.0
-short_description: AI for efficiency in Industries & Services (WIP)
+short_description: A Smarter Efficiency Across Industries !
+tags:
+  - agent-demo-track
+  - agent
+  - mistral-ai
 ---
 
-An example chatbot using [Gradio](https://gradio.app), [`huggingface_hub`](https://huggingface.co/docs/huggingface_hub/v0.22.2/en/index), and the [Hugging Face Inference API](https://huggingface.co/docs/api-inference/index).
+An example chatbot using [Gradio](https://gradio.app), [`huggingface_hub`](https://huggingface.co/docs/huggingface_hub/v0.22.2/en/index).
