@@ -62,4 +62,8 @@ async def machine_metrics(raw_data):
 async def fetch_issues(raw_data):
     df = pd.DataFrame(raw_data)
     issues = df[df["Event"] == "Machine Error"]
-    return issues[["Timestamp", "Event", "Error Code", "Error Description", "Downtime Start", "Downtime End"]]
+    selected_issues = issues[
+        ["Timestamp", "Event", "Error Code", "Error Description", "Downtime Start", "Downtime End"]
+    ]
+    selected_issues.to_json('data/downtimes.json', orient="records", indent=4)
+    return selected_issues

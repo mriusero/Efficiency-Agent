@@ -41,7 +41,7 @@ def sidebar_ui(state, width=700, visible=True):
                             examples=[
                               #  ["What is the sum of 1+1 ?"],
                                 ["How is the production process going?"],
-                                ["What are the common issues faced in production?"],
+                                ["What are the common downtimes faced in production?"],
                                 ["Can you explain me Cp & Cpk KPIs ?"],
                                # ["Can you provide insights on equipment performance?"],
                                # ["How can I optimize the workflow in the production area?"],

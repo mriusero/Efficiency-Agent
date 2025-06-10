@@ -8,6 +8,7 @@ from src.agent.tools import (
     retrieve_knowledge,
     visit_webpage,
     get_production_status,
+    get_downtimes,
 )
 
 load_dotenv()
@@ -24,6 +25,7 @@ class MistralAgent:
             "retrieve_knowledge": retrieve_knowledge,
             "visit_webpage": visit_webpage,
             "get_production_status": get_production_status,
+            "get_downtimes": get_downtimes,
         }
         self.tools = self.get_tools()
 
@@ -36,5 +38,6 @@ class MistralAgent:
                 retrieve_knowledge,
                 visit_webpage,
                 get_production_status,
+                get_downtimes,
             ]
         ).get('tools')

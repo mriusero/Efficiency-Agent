@@ -1,0 +1,18 @@
+[
+    {
+        "Timestamp":"2025-06-11 00:07:38",
+        "Event":"Machine Error",
+        "Error Code":"E003",
+        "Error Description":"Material Jam",
+        "Downtime Start":"2025-06-11 00:07:38",
+        "Downtime End":"2025-06-11 00:15:38"
+    },
+    {
+        "Timestamp":"2025-06-11 00:17:40",
+        "Event":"Machine Error",
+        "Error Code":"E007",
+        "Error Description":"Wear and Tear of Parts",
+        "Downtime Start":"2025-06-11 00:17:40",
+        "Downtime End":"2025-06-11 00:32:40"
+    }
+]
