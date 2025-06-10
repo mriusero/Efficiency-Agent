@@ -23,11 +23,10 @@ with gr.Blocks(theme=custom_theme) as demo:
 
         # HEADER
         gr.Markdown("# Efficiency Agent ⚡️️")
-        gr.Markdown("### *Smarter Efficiency. Across Industries & Services !*")
+        gr.Markdown("### *Efficiency Across Industries*")
         gr.Markdown(
             """
-            This demo showcases the capabilities of an AI-Agent designed to assist in production processes.  
-            You can interact with the chatbot to get insights and assistance on production-related queries.
+This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
             """
         )
 
@@ -42,11 +41,28 @@ with gr.Blocks(theme=custom_theme) as demo:
             dashboard_ui(state)
 
         # DESCRIPTION
-        with gr.Tab("Description"):
+        with gr.Tab("Readme"):
             gr.Markdown(
                 """
-                IndustryMind AI is an AI-powered chatbot designed to assist with industrial production processes. 
-                It can help you manage production lines, monitor equipment, and optimize workflows.
+## Design
+
+The agent is implemented using **Mistral AI** via the `mistral-large-2411` LLM. Its capabilities have been enhanced with a chain-of-thought reasoning process, allowing it to `think`, `act`, `observe`, and `respond` effectively to user queries. The agent is presented through a **Gradio interface**, which is well-suited for both real-time visualization and LLM interaction. 
+
+---
+
+## Purposes  
+I took inspiration from my experience in the manufacturing industry, where understanding operational metrics is crucial for efficiency. More specifically, gaining precise insights from over 30 real-time telemetry metrics is a game changer, allowing teams to focus on critical areas for improvement and optimization.  
+
+Also, as the know-how is embedded in the agent, the risk of knowledge loss is minimized, ensuring that valuable insights are retained and can be shared across the organization.  Of course, this type of agent can be quickly adapted to various industry and service use cases such as manufacturing, cloud services, logistics, healthcare, and more.
+
+---
+
+## Personal Quote  
+I believe that continuous improvement and efficiency are key to success in any industry.  Two years ago, I made a career shift from manufacturing to data science with a specific goal in mind: to leverage AI for operational excellence across various industries.
+
+Today, I'm looking for opportunities to apply my expertise in AI, coupled with my passion for technology and operational excellence.  Looking for a collaborator? I’d love to connect and see how we can create something great together!  
+
+[Send Mail](mailto:mriusero@icloud.com)
                 """
             )
 
