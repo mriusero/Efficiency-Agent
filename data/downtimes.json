@@ -1,42 +1,10 @@
 [
     {
-        "Timestamp":"2025-06-11 02:28:41",
+        "Timestamp":"2025-06-11 02:40:38",
         "Event":"Machine Error",
-        "Error Code":"E003",
-        "Error Description":"Material Jam",
-        "Downtime Start":"2025-06-11 02:28:41",
-        "Downtime End":"2025-06-11 02:36:41"
-    },
-    {
-        "Timestamp":"2025-06-11 02:38:45",
-        "Event":"Machine Error",
-        "Error Code":"E005",
-        "Error Description":"Power Failure",
-        "Downtime Start":"2025-06-11 02:38:45",
-        "Downtime End":"2025-06-11 02:48:45"
-    },
-    {
-        "Timestamp":"2025-06-11 02:48:52",
-        "Event":"Machine Error",
-        "Error Code":"E007",
-        "Error Description":"Wear and Tear of Parts",
-        "Downtime Start":"2025-06-11 02:48:52",
-        "Downtime End":"2025-06-11 03:03:52"
-    },
-    {
-        "Timestamp":"2025-06-11 03:04:27",
-        "Event":"Machine Error",
-        "Error Code":"E010",
-        "Error Description":"Positioning Error",
-        "Downtime Start":"2025-06-11 03:04:27",
-        "Downtime End":"2025-06-11 03:19:27"
-    },
-    {
-        "Timestamp":"2025-06-11 03:19:30",
-        "Event":"Machine Error",
-        "Error Code":"E009",
-        "Error Description":"Low Lubricant Level",
-        "Downtime Start":"2025-06-11 03:19:30",
-        "Downtime End":"2025-06-11 03:27:30"
+        "Error Code":"E001",
+        "Error Description":"Calibration Error",
+        "Downtime Start":"2025-06-11 02:40:38",
+        "Downtime End":"2025-06-11 02:55:38"
     }
 ]
