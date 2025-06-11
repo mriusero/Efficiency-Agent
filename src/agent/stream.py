@@ -35,7 +35,7 @@ async def respond(message, history=None, state=None):
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": message},
-            {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True},
+            {"role": "assistant", "content": "THINK: Let's tackle this query step by step, the user is asking", "prefix": True},
         ]
         history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
         yield history
@@ -43,7 +43,7 @@ async def respond(message, history=None, state=None):
         history = []
         messages = state["chat"] + [
             {"role": "user", "content": message},
-            {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True}
+            {"role": "assistant", "content": "THINK: Let's tackle this query step by step, the user is asking", "prefix": True}
         ]
         history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
         yield history
@@ -126,7 +126,7 @@ async def respond(message, history=None, state=None):
                 prefix_label = current_phase.upper() if current_phase != "final" else "FINAL ANSWER"
                 messages.append({
                     "role": "assistant",
-                    "content": f"{prefix_label}: {buffer}\n\nACT: Let's using some tools to solve the problem.",
+                    "content": f"{prefix_label}: {buffer}\n\nACT: Now, let's using some tools to answer this query.",
                     "prefix": True
                 })
 
@@ -141,7 +141,7 @@ async def respond(message, history=None, state=None):
                     del message["prefix"]
             messages.append({
                 "role": "assistant",
-                "content": "OBSERVE: Based on the results, let's observe the situation and see if we need to adjust our approach.",
+                "content": "OBSERVE: Based on the results, I can conclude that",
                 "prefix": True
             })
 
@@ -164,6 +164,16 @@ async def respond(message, history=None, state=None):
                     last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
                     if last_tool_response and last_tool_response.get("content"):
                         output = last_tool_response["content"]
+
+                        if fn_name == "retrieve_knowledge":
+                        #    pattern1 = r"##### Knowledge for '.*' \n\n"
+                            pattern2 = r"Fetched \d+ relevant documents.\n\n"
+                            combined_pattern = re.compile(f"({pattern2})", re.DOTALL)
+                            match = combined_pattern.search(output)
+                            if match:
+                                output = match.group(1)
+                            else:
+                                output = "No relevant data found."
 
                         parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
                         if parent_message:

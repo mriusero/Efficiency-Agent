@@ -5,7 +5,7 @@ def format_the(query, results):
     if results ==  "No relevant data found in the knowledge database. Have you checked any webpages or use any tools? If so, please try to find more relevant data.":
         return results
     else:
-        formatted_text = f"#### Knowledge for '{query}' \n\n"
+        formatted_text = f"##### Knowledge for '{query}' \n\n"
         formatted_text += f"Fetched {len(results['documents'])} relevant documents.\n\n"
         try:
             for i in range(len(results['documents'])):
