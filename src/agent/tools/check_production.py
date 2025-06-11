@@ -5,6 +5,7 @@ from src.agent.utils.tooling import tool
 def get_production_status() -> str:
     """
     This tool retrieves the current production status including various metrics such as operating time, unplanned stops, quality rates, availability, and performance indicators.
+    Useful for understanding the overall production health and efficiency.
     """
     try:
         with open("data/status.json", "r") as f:
