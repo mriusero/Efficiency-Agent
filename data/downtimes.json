@@ -1,10 +1,1 @@
-[
-    {
-        "Timestamp":"2025-06-11 02:40:38",
-        "Event":"Machine Error",
-        "Error Code":"E001",
-        "Error Description":"Calibration Error",
-        "Downtime Start":"2025-06-11 02:40:38",
-        "Downtime End":"2025-06-11 02:55:38"
-    }
-]
+"[]"

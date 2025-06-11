@@ -14,7 +14,7 @@ def get_downtimes() -> str:
 
         data = json.loads(json_string)
 
-        if data is None or len(data) == 0:
+        if data is None or len(data) == 0 or data == "[]":
             result = "No downtimes recorded yet. Please check the production status or wait for downtimes to occur."
         else:
             result = "## Downtimes:\n\n"

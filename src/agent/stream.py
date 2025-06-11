@@ -4,7 +4,6 @@ import asyncio
 import re
 
 from src.agent.mistral_agent import MistralAgent
-
 from src.agent.utils.call import call_tool
 
 
@@ -28,34 +27,44 @@ def extract_phases(text):
 
     return phases
 
-async def respond(message, history=None):
+
+async def respond(message, history=None, state=None):
+
     if history is None:
         history = []
 
-    if not history or history[-1].role != "assistant" or history[-1].metadata.get("status") == "done":
-        history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending"}))
-    yield history
-
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": message},
-        {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True},
-    ]
+    if state["cycle"] == 0:
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": message},
+            {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True},
+        ]
+        history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
+        yield history
+    else:
+        messages = state["chat"] + [
+            {"role": "user", "content": message},
+            {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True}
+        ]
+        history.append(ChatMessage(role="assistant", content=""))
+        history[-1] = (ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
+        yield history
 
     phase_order = ["think", "act", "observe", "final"]
-    current_phase_index = 0
+    phase_index = 0
     done = False
-
     final_full = ""
+
     while not done:
-        current_phase = phase_order[current_phase_index]
+        current_phase = phase_order[phase_index]
         if current_phase != "final":
             full = ""
         else:
             full = final_full
 
         print('\n', '---' * 15)
-        print(f">>> messages before payload [phase {current_phase_index}] :", json.dumps([m for m in messages if m.get("role") != "system"], indent=2))
+        print(f">>> messages before payload [phase {phase_index}] :", json.dumps([m for m in messages if m.get("role") != "system"], indent=2))
+        #print(f">>> messages: {json.dumps(messages, indent=2)}")
         payload = {
             "agent_id": agent.agent_id,
             "messages": messages,
@@ -74,6 +83,7 @@ async def respond(message, history=None):
             async for chunk in response:
                 delta = chunk.data.choices[0].delta
                 content = delta.content or ""
+
                 full += content
                 if current_phase == "final":
                     final_full = full
@@ -81,11 +91,11 @@ async def respond(message, history=None):
                 phases = extract_phases(full)
                 buffer = phases.get(current_phase, "")
                 if current_phase == "think":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending"})
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending", "id": state['cycle'], 'parent_id': state["cycle"]})
                 elif current_phase == "act":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending"})
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
                 elif current_phase == "observe":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending"})
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
                 yield history
 
                 if current_phase == "final":
@@ -98,7 +108,7 @@ async def respond(message, history=None):
                         done = True
                         break
 
-        if current_phase_index == 0:
+        if phase_index == 0:
             messages = [msg for msg in messages if not msg.get("prefix")]
             if buffer:
                 prefix_label = current_phase.upper() if current_phase != "final" else "FINAL ANSWER"
@@ -108,12 +118,12 @@ async def respond(message, history=None):
                     "prefix": True
                 })
 
-        elif current_phase_index == 1:
+        elif phase_index == 1:
             for message in messages:
                 if "prefix" in message:
                     del message["prefix"]
 
-        if current_phase_index == 2:
+        if phase_index == 2:
             for message in messages:
                 if "prefix" in message:
                     del message["prefix"]
@@ -137,12 +147,12 @@ async def respond(message, history=None):
                     last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
                     if last_tool_response and last_tool_response.get("content"):
                         buffer += "\n\n" + last_tool_response["content"]
-                        history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending"})
+                        history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
                 yield history
 
         if not done:
-            current_phase_index += 1
-            if current_phase_index < len(phase_order):
+            phase_index += 1
+            if phase_index < len(phase_order):
                 pass
             else:
                 done = True
@@ -151,9 +161,20 @@ async def respond(message, history=None):
     final_text = phases.get("final", "")
 
     if observe_text:
-        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Observing...", "status": "done"})
-
+        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Observing...", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+        messages = [msg for msg in messages if not msg.get("prefix")]
+        messages.append({
+            "role": "assistant",
+            "content": observe_text,
+        })
     if final_text:
         history.append(ChatMessage(role="assistant", content=final_text))
+
+        last_message = messages[-1]
+        last_message["content"] += ' FINAL ANSWER: ' + final_text
+        messages[-1] = last_message
+
+        state["cycle"] += 1
+        state["chat"] = messages
 
     yield history

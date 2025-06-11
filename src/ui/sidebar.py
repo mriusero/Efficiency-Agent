@@ -50,6 +50,7 @@ def sidebar_ui(state, width=700, visible=True):
                                # ["How do I troubleshoot a specific piece of equipment?"],
                                # ["What are the best practices for maintaining production efficiency?"]
                             ],
+                            additional_inputs=[state],
                             cache_examples=False
                         )
         sessions_state = gr.JSON(

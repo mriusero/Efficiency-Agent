@@ -181,6 +181,9 @@ async def on_tick(state, displays):
         with open("data/status.json", "w") as f:
             json.dump(state["status"], f, indent=4)
 
+        with open("data/downtimes.json", "w") as f:
+            json.dump(issues_df.to_json(orient='records'), f, indent=4)
+
         return tool_plots + general_plots + [state]
 
 def dashboard_ui(state):

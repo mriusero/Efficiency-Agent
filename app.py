@@ -15,6 +15,8 @@ STATE = {
     "running": False,
     "date": datetime.now(),
     "part_id": 0,
+    "cycle": 0,
+    "chat": [],
     "status": {},
     "data": {},
 }
