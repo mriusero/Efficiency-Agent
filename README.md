@@ -22,6 +22,13 @@ tags:
 
 This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
 
+See the agent in action: 
+
+<video controls width="600">
+  <source src="https://huggingface.co/spaces/Agents-MCP-Hackathon/IndustryMind-AI/blob/main/EfficiencyAgent.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 > #### Demo Usage
 >
 > You can interact with the chatbot to gain insights and assistance on production-related queries.  
