@@ -150,6 +150,11 @@ async def respond(message, history=None, state=None):
         if current_phase == "act":
             tool_calls = getattr(delta, "tool_calls", None)
             if tool_calls and tool_calls != [] and str(tool_calls) != "Unset()":
+
+                for tool_call in tool_calls:
+                    fn_name = tool_call.function.name
+                    fn_args = json.loads(tool_call.function.arguments)
+
                 async with tool_lock:
                     messages = call_tool(
                         agent,
@@ -158,11 +163,11 @@ async def respond(message, history=None, state=None):
                     )
                     last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
                     if last_tool_response and last_tool_response.get("content"):
-                        buffer += "\n\n" + last_tool_response["content"]
+                        output = last_tool_response["content"]
 
                         parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
                         if parent_message:
-                            parent_message.content += "\n\n" + buffer
+                            parent_message.content += "\n\n" + buffer + f"\n\nTool: `{fn_name}`\nArgs: `{fn_args}`\n\n" + output + '\n\n'
                             parent_message.metadata["title"] = "Acting..."
                         else:
                             history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})

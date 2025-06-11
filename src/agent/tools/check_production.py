@@ -13,12 +13,12 @@ def get_production_status() -> str:
         data = json.loads(json_string)
 
         if data == {}:
-            result = "Production has not started yet."
+            result = "'production has not started yet.'"
 
         elif data["opening_time"] == "0 days 00:00:00":
-            result = "Production has not started yet."
+            result = "'Production has not started yet.'"
         else:
-            result = "## Production status:\n\n"
+            result = "##### Production status:\n\n"
             result += json_string
 
         return result
