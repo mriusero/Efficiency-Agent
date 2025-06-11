@@ -22,10 +22,7 @@ tags:
 
 This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
 
-<video controls width="600">
-  <source src="https://huggingface.co/spaces/Agents-MCP-Hackathon/IndustryMind-AI/blob/main/EfficiencyAgent.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[See video overview](https://drive.google.com/file/d/1Bv1uF3-4EeR1HePSafZN1yzInr7YcQXZ/view?usp=share_link)
 
 > #### Demo Usage
 >
