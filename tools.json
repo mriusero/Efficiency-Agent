@@ -64,7 +64,7 @@
         "type": "function",
         "function": {
             "name": "get_production_status",
-            "description": "This tool retrieves the current production status including various metrics such as operating time, unplanned stops, quality rates, availability, and performance indicators.",
+            "description": "This tool retrieves the current production status including various metrics such as operating time, unplanned stops, quality rates, availability, and performance indicators. Useful for understanding the overall production health and efficiency.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -76,7 +76,7 @@
         "type": "function",
         "function": {
             "name": "get_downtimes",
-            "description": "This tool retrieves the production downtimes including :",
+            "description": "This tool provide the production downtimes which is useful for understanding production issues and causes. Data contains information about downtimes including their description, duration and causes.",
             "parameters": {
                 "type": "object",
                 "properties": {},

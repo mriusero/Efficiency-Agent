@@ -39,7 +39,7 @@ def sidebar_ui(state, width=700, visible=True):
                             save_history=True,
                             examples=[
                               #  ["What is the sum of 1+1 ?"],
-                                ["How is the production process going?"],
+                                ["How is the production health now?"],
                                 ["What is the most critical issue in the production right now?"],
                                 ["What are the common downtimes faced in production?"],
                                 ["Can you explain me Cp & Cpk KPIs ?"],
