@@ -43,6 +43,7 @@ def sidebar_ui(state, width=700, visible=True):
                                 ["What is the most critical issue in the production right now?"],
                                 ["What are the common downtimes faced in production?"],
                                 ["Can you explain me Cp & Cpk KPIs ?"],
+                                ["Which tool have the worst quality rate ?"],
                                 ["On what metrics should I focus to improve global efficiency?"],
                                # ["Can you provide insights on equipment performance?"],
                                # ["How can I optimize the workflow in the production area?"],
