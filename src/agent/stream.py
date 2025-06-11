@@ -100,15 +100,15 @@ async def respond(message, history=None, state=None):
                     #else:
                     #    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
 
-                elif current_phase == "observe":
-                    parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
-                    if parent_message:
-                        parent_message.content += "\n\n" + buffer
-                        parent_message.metadata["title"] = "Acting..."
-                    else:
-                        history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
-
-                yield history
+                #elif current_phase == "observe":
+                #    parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+                #    if parent_message:
+                #        parent_message.content += "\n\n" + buffer
+                #        parent_message.metadata["title"] = "Acting..."
+                #    else:
+                #        history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+#
+                #yield history
 
                 if current_phase == "final":
                     delta_content = delta.content or ""
@@ -202,12 +202,17 @@ async def respond(message, history=None, state=None):
         parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
         if parent_message:
             parent_message.content += "\n\n" + observe_text
-            parent_message.metadata["title"] = "Thoughts"
-            parent_message.metadata["status"] = "done"
+            parent_message.metadata["title"] = "Observing..."
+            parent_message.metadata["status"] = "pending"
         else:
-            history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Thoughts", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+            history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
 
     if final_text:
+        parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+        if parent_message:
+            parent_message.metadata["title"] = "Thoughts"
+            parent_message.metadata["status"] = "done"
+
         history.append(ChatMessage(role="assistant", content=final_text))
 
         last_message = messages[-1]
