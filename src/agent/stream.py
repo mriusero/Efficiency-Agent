@@ -42,12 +42,12 @@ async def respond(message, history=None, state=None):
         history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
         yield history
     else:
+        history = []
         messages = state["chat"] + [
             {"role": "user", "content": message},
             {"role": "assistant", "content": "THINK: Let's start thinking, ", "prefix": True}
         ]
-        history.append(ChatMessage(role="assistant", content=""))
-        history[-1] = (ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
+        history.append(ChatMessage(role="assistant", content="", metadata={"title": "Thinking...", "status": "pending", 'id': state["cycle"]}))
         yield history
 
     phase_order = ["think", "act", "observe", "final"]
@@ -91,7 +91,7 @@ async def respond(message, history=None, state=None):
                 phases = extract_phases(full)
                 buffer = phases.get(current_phase, "")
                 if current_phase == "think":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending", "id": state['cycle'], 'parent_id': state["cycle"]})
+                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending", "id": state['cycle']})
                 elif current_phase == "act":
                     history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
                 elif current_phase == "observe":
@@ -161,7 +161,7 @@ async def respond(message, history=None, state=None):
     final_text = phases.get("final", "")
 
     if observe_text:
-        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Observing...", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Thoughts", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
         messages = [msg for msg in messages if not msg.get("prefix")]
         messages.append({
             "role": "assistant",
