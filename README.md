@@ -22,7 +22,7 @@ tags:
 
 This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
 
-[See video overview](https://drive.google.com/file/d/1Bv1uF3-4EeR1HePSafZN1yzInr7YcQXZ/view?usp=share_link)
+[See video overview](https://drive.google.com/file/d/1qa7wDxZWQlmktBauNlP8QxYFYG6he_3D/view?usp=share_link)
 
 > #### Demo Usage
 >
