@@ -18,7 +18,7 @@ class MistralAgent:
         self.api_key = os.getenv("MISTRAL_API_KEY")
         self.agent_id = os.getenv("AGENT_ID")
         self.client = Mistral(api_key=self.api_key)
-        self.model = "mistral-large"
+        self.model = "mistral-medium-latest"
         self.prompt = None
         self.names_to_functions = {
             "calculate_sum": calculate_sum,
