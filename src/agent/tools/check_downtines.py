@@ -4,10 +4,7 @@ from src.agent.utils.tooling import tool
 @tool
 def get_downtimes() -> str:
     """
-    This tool provide the production downtimes which is useful for understanding production issues and causes.
-    Data contains :
-    - Timestamps of downtimes starts and endings,
-    - Event, Error Code and Error Description
+    This tool provide the production downtimes which is useful for understanding production issues and causes. Data contains information about downtimes including their description, duration and causes.
     """
     try:
         with open("data/downtimes.json", "r") as f:
