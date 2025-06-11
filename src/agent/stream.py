@@ -15,16 +15,14 @@ with open("./prompt.md", encoding="utf-8") as f:
     SYSTEM_PROMPT = f.read()
 
 def extract_phases(text):
-    """Découpe le contenu en THINK / ACT / OBSERVE / FINAL ANSWER"""
+    """Split streaming in THINK / ACT / OBSERVE / FINAL ANSWER"""
     phases = {'think': '', 'act': '', 'observe': '', 'final': ''}
     matches = list(re.finditer(r'(THINK:|ACT:|OBSERVE:|FINAL ANSWER:)', text))
-
     for i, match in enumerate(matches):
         phase = match.group(1).lower().replace(":", "").replace("final answer", "final")
         start = match.end()
         end = matches[i+1].start() if i + 1 < len(matches) else len(text)
         phases[phase] = text[start:end].strip()
-
     return phases
 
 
@@ -90,12 +88,26 @@ async def respond(message, history=None, state=None):
 
                 phases = extract_phases(full)
                 buffer = phases.get(current_phase, "")
+
                 if current_phase == "think":
                     history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending", "id": state['cycle']})
-                elif current_phase == "act":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
+
+                #elif current_phase == "act":
+                    #parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+                    #if parent_message:
+                    #    parent_message.content += "\n\n" + buffer
+                    #    parent_message.metadata["title"] = "Acting..."
+                    #else:
+                    #    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
+
                 elif current_phase == "observe":
-                    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+                    parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+                    if parent_message:
+                        parent_message.content += "\n\n" + buffer
+                        parent_message.metadata["title"] = "Acting..."
+                    else:
+                        history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+
                 yield history
 
                 if current_phase == "final":
@@ -147,7 +159,13 @@ async def respond(message, history=None, state=None):
                     last_tool_response = next((m for m in reversed(messages) if m["role"] == "tool"), None)
                     if last_tool_response and last_tool_response.get("content"):
                         buffer += "\n\n" + last_tool_response["content"]
-                        history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
+
+                        parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+                        if parent_message:
+                            parent_message.content += "\n\n" + buffer
+                            parent_message.metadata["title"] = "Acting..."
+                        else:
+                            history[-1] = ChatMessage(role="assistant", content=buffer,  metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
                 yield history
 
         if not done:
@@ -161,12 +179,19 @@ async def respond(message, history=None, state=None):
     final_text = phases.get("final", "")
 
     if observe_text:
-        history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Thoughts", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
         messages = [msg for msg in messages if not msg.get("prefix")]
         messages.append({
             "role": "assistant",
             "content": observe_text,
         })
+        parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
+        if parent_message:
+            parent_message.content += "\n\n" + observe_text
+            parent_message.metadata["title"] = "Thoughts"
+            parent_message.metadata["status"] = "done"
+        else:
+            history[-1] = ChatMessage(role="assistant", content=observe_text, metadata={"title": "Thoughts", "status": "done", "id": state['cycle']+2, 'parent_id': state["cycle"]})
+
     if final_text:
         history.append(ChatMessage(role="assistant", content=final_text))
 
