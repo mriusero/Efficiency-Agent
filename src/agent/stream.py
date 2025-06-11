@@ -92,24 +92,6 @@ async def respond(message, history=None, state=None):
                 if current_phase == "think":
                     history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Thinking...", "status": "pending", "id": state['cycle']})
 
-                #elif current_phase == "act":
-                    #parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
-                    #if parent_message:
-                    #    parent_message.content += "\n\n" + buffer
-                    #    parent_message.metadata["title"] = "Acting..."
-                    #else:
-                    #    history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Acting...", "status": "pending", "id": state['cycle']+1, 'parent_id': state["cycle"]})
-
-                #elif current_phase == "observe":
-                #    parent_message = next((msg for msg in history if msg.metadata.get("id") == state['cycle']), None)
-                #    if parent_message:
-                #        parent_message.content += "\n\n" + buffer
-                #        parent_message.metadata["title"] = "Acting..."
-                #    else:
-                #        history[-1] = ChatMessage(role="assistant", content=buffer, metadata={"title": "Observing...", "status": "pending", "id": state['cycle']+2, 'parent_id': state["cycle"]})
-#
-                #yield history
-
                 if current_phase == "final":
                     delta_content = delta.content or ""
                     final_full += delta_content

@@ -35,8 +35,8 @@ This is a demo of an AI agent designed to assist industries and service provider
 
 ### Design
 
-* The agent is implemented using **Mistral AI** via the `mistral-large-2411` LLM.  
-* Its capabilities have been enhanced with a chain-of-thought reasoning process, allowing it to think, act, observe, and respond effectively to user queries.  
+* The agent is implemented using **Mistral AI** via the **mistral-medium-2505** LLM.  
+* Its capabilities have been enhanced with a **chain-of-thought** reasoning process, allowing it to think, act, observe, and respond effectively to user queries.  
 * The agent is presented through a **Gradio interface**, which is well-suited for both real-time visualization and LLM interaction.
 
 ### Purposes  
