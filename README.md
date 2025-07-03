@@ -15,12 +15,13 @@ tags:
   - mistral-ai
 ---
 
-# Efficiency Agent ⚡️️  
-### *Smarter Efficiency. Across Industries & Services!*
+# Efficiency Agent ⚡️️
+
+![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?logo=huggingface&logoColor=000)
+![Gradio](https://img.shields.io/badge/Gradio-FFA500?logo=gradio&logoColor=fff)
 
 ## Agent Overview
-
-This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
+This project is part of the [Agents-MCP-Hackathon](https://huggingface.co/Agents-MCP-Hackathon). This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
 
 [See video overview](https://drive.google.com/file/d/1qa7wDxZWQlmktBauNlP8QxYFYG6he_3D/view?usp=share_link)
 
@@ -43,9 +44,7 @@ This is a demo of an AI agent designed to assist industries and service provider
 I took inspiration from my experience in the manufacturing industry, where understanding operational metrics is crucial for efficiency. More specifically, gaining precise insights from over 30 real-time telemetry metrics is a game changer, allowing teams to focus on critical areas for improvement and optimization.  
 Also, since the know-how is embedded in the agent, the risk of knowledge loss is minimized ensuring that valuable insights are retained and can be shared across the organization.  Of course, this type of agent can be quickly adapted to various industry and service use cases such as manufacturing, cloud services, logistics, healthcare, and more.
 
-
-### Personal Quote  
-I believe that continuous improvement and efficiency are key to success in any industry.  Two years ago, I made a career shift from manufacturing to data science with a specific goal in mind: to leverage AI for operational excellence across various industries.  
-Today, I'm looking for opportunities to apply my expertise in AI, coupled with my passion for technology and operational excellence.  Looking for a collaborator? I’d love to connect and see how we can create something great together!  
-
-[Send Mail](mailto:mriusero@icloud.com)
+> [Important]
+> 
+> The demo is available on the [HF Space](https://huggingface.co/spaces/mriusero/efficiency-agent).  
+> If you want to run the demo locally, please add a `MISTRAL_API_KEY` & `AGENT_ID` to your `.env` file, credentials can be obtained from the [Mistral AI](https://console.mistral.ai/) website.
