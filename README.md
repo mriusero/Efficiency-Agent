@@ -17,8 +17,8 @@ tags:
 
 # Efficiency Agent ⚡️️
 
-![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?logo=huggingface&logoColor=000)
-![Gradio](https://img.shields.io/badge/Gradio-FFA500?logo=gradio&logoColor=fff)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/)
+[![Gradio](https://img.shields.io/badge/Gradio-FFA500?logo=gradio&logoColor=fff)](https://gradio.app/)
 
 ## Agent Overview
 This project is part of the [Agents-MCP-Hackathon](https://huggingface.co/Agents-MCP-Hackathon). This is a demo of an AI agent designed to assist industries and service providers in understanding and interpreting their operational metrics. The agent has access to real-time telemetry data that measures quality, downtime, and operational performance.
@@ -44,7 +44,7 @@ This project is part of the [Agents-MCP-Hackathon](https://huggingface.co/Agents
 I took inspiration from my experience in the manufacturing industry, where understanding operational metrics is crucial for efficiency. More specifically, gaining precise insights from over 30 real-time telemetry metrics is a game changer, allowing teams to focus on critical areas for improvement and optimization.  
 Also, since the know-how is embedded in the agent, the risk of knowledge loss is minimized ensuring that valuable insights are retained and can be shared across the organization.  Of course, this type of agent can be quickly adapted to various industry and service use cases such as manufacturing, cloud services, logistics, healthcare, and more.
 
-> [Important]
+> [!IMPORTANT]
 > 
 > The demo is available on the [HF Space](https://huggingface.co/spaces/mriusero/efficiency-agent).  
-> If you want to run the demo locally, please add a `MISTRAL_API_KEY` & `AGENT_ID` to your `.env` file, credentials can be obtained from the [Mistral AI](https://console.mistral.ai/) website.
+> If you want to run the demo locally, please add a `MISTRAL_API_KEY` & `AGENT_ID` to your `.env` file, credentials can be obtained from the [Mistral AI - La Plateforme](https://console.mistral.ai/) website.
